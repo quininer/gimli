@@ -67,12 +67,14 @@ impl GimliHash {
 
         while len > 0 {
             let take = cmp::min(RATE - self.pos, len);
-            for _ in 0..take {
-                self.state[self.pos] ^= buf[start];
-                self.pos += 1;
-                start += 1;
-                len -= 1;
+            for (dst, &src) in self.state[self.pos..][..take].iter_mut()
+                .zip(&buf[start..][..take])
+            {
+                *dst ^= src;
             }
+            self.pos += take;
+            start += take;
+            len -= take;
 
             if self.pos == RATE {
                 Self::gimli(&mut self.state);
@@ -81,7 +83,6 @@ impl GimliHash {
         }
     }
 
-    #[inline]
     fn pad(&mut self) {
         self.state[self.pos] ^= 0x1f;
         self.state[RATE - 1] ^= 0x80;

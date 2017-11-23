@@ -2,5 +2,8 @@
 name = "gimli-permutation"
 version = "0.1.0"
 authors = ["quininer <quininer@live.com>"]
+description = "Gimli: a cross-platform permutation"
+repository = "https://github.com/quininer/gimli"
+license = "MIT"
 
 [dependencies]
