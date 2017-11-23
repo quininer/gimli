@@ -1,15 +1,18 @@
 #![no_std]
 
+extern crate byteorder;
 extern crate gimli_permutation;
 
 use core::{ cmp, mem };
+use byteorder::{ ByteOrder, LittleEndian };
 use gimli_permutation::{ BLOCK_LENGTH, gimli };
 
 
 pub const RATE: usize = 16;
+type State = [u8; BLOCK_LENGTH * 4];
 
 pub struct GimliHash {
-    state: [u8; BLOCK_LENGTH * 4],
+    state: State,
     pos: usize
 }
 
@@ -45,6 +48,19 @@ impl GimliHash {
         XofReader { state: self.state, pos: 0 }
     }
 
+    #[inline]
+    fn gimli(state: &mut State) {
+        #[inline]
+        fn array_to_block(arr: &mut [u8; BLOCK_LENGTH * 4]) -> &mut [u32; BLOCK_LENGTH] {
+            unsafe { mem::transmute(arr) }
+        }
+
+        let state = array_to_block(state);
+        LittleEndian::from_slice_u32(state);
+        gimli(state);
+        LittleEndian::from_slice_u32(state);
+    }
+
     fn absorb(&mut self, buf: &[u8]) {
         let mut start = 0;
         let mut len = buf.len();
@@ -59,22 +75,23 @@ impl GimliHash {
             }
 
             if self.pos == RATE {
-                gimli(array_to_block(&mut self.state));
+                Self::gimli(&mut self.state);
                 self.pos = 0;
             }
         }
     }
 
+    #[inline]
     fn pad(&mut self) {
         self.state[self.pos] ^= 0x1f;
         self.state[RATE - 1] ^= 0x80;
-        gimli(array_to_block(&mut self.state));
+        Self::gimli(&mut self.state);
     }
 }
 
 
 pub struct XofReader {
-    state: [u8; BLOCK_LENGTH * 4],
+    state: State,
     pos: usize
 }
 
@@ -86,16 +103,9 @@ impl XofReader {
             self.pos += len;
 
             if self.pos == RATE {
-                gimli(array_to_block(&mut self.state));
+                GimliHash::gimli(&mut self.state);
                 self.pos = 0;
             }
         }
     }
-}
-
-
-
-#[inline]
-fn array_to_block(arr: &mut [u8; BLOCK_LENGTH * 4]) -> &mut [u32; BLOCK_LENGTH] {
-    unsafe { mem::transmute(arr) }
 }

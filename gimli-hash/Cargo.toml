@@ -4,8 +4,9 @@ version = "0.1.0"
 authors = ["quininer <quininer@live.com>"]
 
 [dependencies]
+byteorder = { version = "1", default-features = false }
 gimli-permutation = { path = "../gimli-permutation" }
 
 
 [dev-dependencies]
-hex = "*"
+hex = "0.3"
