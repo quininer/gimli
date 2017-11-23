@@ -1,6 +1,2 @@
-[package]
-name = "gimli-permutation"
-version = "0.1.0"
-authors = ["quininer <quininer@live.com>"]
-
-[dependencies]
+[workspace]
+members = [ "gimli-permutation", "gimli-hash" ]

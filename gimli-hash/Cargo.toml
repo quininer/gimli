@@ -1,0 +1,11 @@
+[package]
+name = "gimli-hash"
+version = "0.1.0"
+authors = ["quininer <quininer@live.com>"]
+
+[dependencies]
+gimli-permutation = { path = "../gimli-permutation" }
+
+
+[dev-dependencies]
+hex = "*"
