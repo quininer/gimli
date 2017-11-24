@@ -11,6 +11,7 @@ use gimli_permutation::{ BLOCK_LENGTH, gimli };
 pub const RATE: usize = 16;
 type State = [u8; BLOCK_LENGTH * 4];
 
+
 pub struct GimliHash {
     state: State,
     pos: usize

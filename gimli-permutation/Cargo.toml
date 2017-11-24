@@ -7,3 +7,7 @@ repository = "https://github.com/quininer/gimli"
 license = "MIT"
 
 [dependencies]
+coresimd = { git = "https://github.com/rust-lang-nursery/stdsimd", optional = true }
+
+[features]
+simd = [ "coresimd" ]

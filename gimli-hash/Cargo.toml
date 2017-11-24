@@ -6,6 +6,10 @@ description = "The Gimli-Hash"
 repository = "https://github.com/quininer/gimli"
 license = "MIT"
 
+
+[features]
+# simd = [ "gimli-permutation/simd" ]
+
 [dependencies]
 byteorder = { version = "1", default-features = false }
 gimli-permutation = "0.1"
