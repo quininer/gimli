@@ -8,11 +8,13 @@ extern crate coresimd;
 pub mod portable;
 #[cfg(feature = "simd")]
 #[cfg(target_feature = "ssse3")]
-pub mod sse;
+pub mod ssse3;
+#[cfg(feature = "simd")]
+#[cfg(target_feature = "avx2")]
+pub mod avx2;
 
 
 pub const BLOCK_LENGTH: usize = 12;
-
 
 #[cfg(not(feature = "simd"))]
 pub use portable::gimli;
@@ -21,7 +23,7 @@ pub use portable::gimli;
 #[inline]
 pub fn gimli(state: &mut [u32; BLOCK_LENGTH]) {
     if cfg_feature_enabled!("ssse3") {
-        unsafe { sse::gimli(state) }
+        unsafe { ssse3::gimli(state) }
     } else {
         portable::gimli(state)
     }

@@ -16,22 +16,21 @@ const COEFFS: [u32x4; 6] = [
     u32x4::new(0x9e37_7910, 0, 0, 0), u32x4::new(0x9e37_7914, 0, 0, 0), u32x4::new(0x9e37_7918, 0, 0, 0)
 ];
 
-#[allow(unused_assignments)] // false positive
 pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH]) {
-    let mut x = u32x4::load(&state[..4], 0);
-    let mut y = u32x4::load(&state[4..][..8], 0);
-    let mut z = u32x4::load(&state[8..], 0);
+    let mut x = u32x4::load(state, 0);
+    let mut y = u32x4::load(state, 4);
+    let mut z = u32x4::load(state, 8);
 
     macro_rules! round {
         () => {
             x = into(_mm_shuffle_epi8(
                 into(x),
-                _mm_set_epi8(12, 15, 14, 13, 8, 11, 10, 9, 4, 7, 6, 5, 0, 3, 2, 1).into()
+                into(_mm_set_epi8(12, 15, 14, 13, 8, 11, 10, 9, 4, 7, 6, 5, 0, 3, 2, 1))
             ));
-            y = (shift(into(y), 9) | _mm_srli_epi32(into(y), 32 - 9)).into();
-            let newz = x.as_i32x4() ^ shift(into(z), 1)    ^ shift(into(y & z), 2);
-            let newy = y            ^ x                     ^ into(shift(into(x | z), 1));
-            x =        z            ^ y                     ^ into(shift(into(x & y), 3));
+            y = into(shift(into(y), 9) | _mm_srli_epi32(into(y), 32 - 9));
+            let newz = x.as_i32x4() ^ shift(into(z), 1) ^ shift(into(y & z), 2);
+            let newy = y            ^ x                 ^ into(shift(into(x | z), 1));
+            x =        z            ^ y                 ^ into(shift(into(x & y), 3));
             y = newy;
             z = into(newz);
         }
@@ -51,9 +50,9 @@ pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH]) {
         round!();
     }
 
-    x.store(&mut state[..4], 0);
-    y.store(&mut state[4..][..8], 0);
-    z.store(&mut state[8..], 0);
+    x.store(state, 0);
+    y.store(state, 4);
+    z.store(state, 8);
 }
 
 
