@@ -1,3 +1,4 @@
+use core::mem::transmute as into;
 use coresimd::simd::u32x4;
 use coresimd::vendor::{
     _mm_shuffle_epi8, _mm_shuffle_epi32,
@@ -23,29 +24,29 @@ pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH]) {
 
     macro_rules! round {
         () => {
-            x = _mm_shuffle_epi8(
-                x.into(),
+            x = into(_mm_shuffle_epi8(
+                into(x),
                 _mm_set_epi8(12, 15, 14, 13, 8, 11, 10, 9, 4, 7, 6, 5, 0, 3, 2, 1).into()
-            ).into();
-            y = (shift(y.into(), 9) | _mm_srli_epi32(y.into(), 32 - 9)).into();
-            let newz = x.as_i32x4() ^ shift(z.into(), 1)    ^ shift((y & z).into(), 2);
-            let newy = y            ^ x                     ^ shift((x | z).into(), 1).into();
-            x =        z            ^ y                     ^ shift((x & y).into(), 3).into();
+            ));
+            y = (shift(into(y), 9) | _mm_srli_epi32(into(y), 32 - 9)).into();
+            let newz = x.as_i32x4() ^ shift(into(z), 1)    ^ shift(into(y & z), 2);
+            let newy = y            ^ x                     ^ into(shift(into(x | z), 1));
+            x =        z            ^ y                     ^ into(shift(into(x & y), 3));
             y = newy;
-            z = newz.into();
+            z = into(newz);
         }
     }
 
-    for round in (0..6).rev() {
+    for &round in COEFFS.iter().rev() {
         round!();
 
-        x = _mm_shuffle_epi32(x.into(), shuffle(2, 3, 0, 1)).into();
-        x ^= COEFFS[round as usize];
+        x = into(_mm_shuffle_epi32(into(x), shuffle(2, 3, 0, 1)));
+        x ^= round;
 
         round!();
         round!();
 
-        x = _mm_shuffle_epi32(x.into(), shuffle(1, 0, 3, 2)).into();
+        x = into(_mm_shuffle_epi32(into(x), shuffle(1, 0, 3, 2)));
 
         round!();
     }
