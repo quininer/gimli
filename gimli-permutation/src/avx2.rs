@@ -24,9 +24,9 @@ pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH * 2]) {
     let (mut y1, mut y2) = (u32x4::load(state, 4), u32x4::load(state, 16));
     let (mut z1, mut z2) = (u32x4::load(state, 8), u32x4::load(state, 20));
 
-    let mut x = _mm256_loadu2_m128i(into(&x1), into(&x2));
-    let mut y = _mm256_loadu2_m128i(into(&y1), into(&y2));
-    let mut z = _mm256_loadu2_m128i(into(&z1), into(&z2));
+    let mut x = _mm256_loadu2_m128i(&x1 as *const _ as _, &x2 as *const _ as _);
+    let mut y = _mm256_loadu2_m128i(&y1 as *const _ as _, &y2 as *const _ as _);
+    let mut z = _mm256_loadu2_m128i(&z1 as *const _ as _, &z2 as *const _ as _);
 
     macro_rules! round {
         () => {
@@ -37,7 +37,7 @@ pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH * 2]) {
                     28, 31, 30, 29, 24, 27, 26, 25, 20, 23, 22, 21, 16, 19, 18, 17
                 ).as_u8x32()
             ).as_i8x32();
-            y = (shift(into(y), 9) | _mm256_srli_epi32(into(y), 32 - 9)).into();
+            y = into(shift(into(y), 9) | _mm256_srli_epi32(into(y), 32 - 9));
             let newz = into::<_, i32x8>(x)  ^ shift(into(z), 1) ^ shift(into(y & z), 2);
             let newy = y                    ^ x                 ^ into(shift(into(x | z), 1));
             x =        z                    ^ y                 ^ into(shift(into(x & y), 3));
@@ -60,9 +60,9 @@ pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH * 2]) {
         round!();
     }
 
-    _mm256_storeu2_m128i(into(&mut x1), into(&mut x2), x);
-    _mm256_storeu2_m128i(into(&mut y1), into(&mut y2), y);
-    _mm256_storeu2_m128i(into(&mut z1), into(&mut z2), z);
+    _mm256_storeu2_m128i(&mut x1 as *mut _ as _, &mut x2 as *mut _ as _, x);
+    _mm256_storeu2_m128i(&mut y1 as *mut _ as _, &mut y2 as *mut _ as _, y);
+    _mm256_storeu2_m128i(&mut z1 as *mut _ as _, &mut z2 as *mut _ as _, z);
 
     x1.store(state, 0);
     x2.store(state, 12);
