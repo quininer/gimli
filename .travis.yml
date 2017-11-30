@@ -2,6 +2,7 @@ language: rust
 rust: nightly
 
 script:
+  - cargo test
   - env RUSTFLAGS="-C target-cpu=native" cargo test --features simd
 
 cache: cargo

@@ -3,7 +3,7 @@
 
 extern crate gimli_permutation;
 
-use gimli_permutation::{ BLOCK_LENGTH, gimli };
+use gimli_permutation::BLOCK_LENGTH;
 
 
 const INPUT: [u32; BLOCK_LENGTH] = [
@@ -29,7 +29,7 @@ fn test_gimli() {
     let mut data = [0; BLOCK_LENGTH];
     data.copy_from_slice(&INPUT);
 
-    gimli(&mut data);
+    gimli_permutation::gimli(&mut data);
     assert_eq!(data, OUTPUT);
 }
 
