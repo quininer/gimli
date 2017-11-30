@@ -18,10 +18,10 @@ const COEFFS: [u32x8; 6] = [
     u32x8::new(0x9e37_7918, 0, 0, 0, 0x9e37_7918, 0, 0, 0),
 ];
 
-pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH * 2]) {
-    let (mut x1, mut x2) = (u32x4::load(state, 0), u32x4::load(state, 12));
-    let (mut y1, mut y2) = (u32x4::load(state, 4), u32x4::load(state, 16));
-    let (mut z1, mut z2) = (u32x4::load(state, 8), u32x4::load(state, 20));
+pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH], state2: &mut [u32; BLOCK_LENGTH]) {
+    let (mut x1, mut x2) = (u32x4::load(state, 0), u32x4::load(state2, 0));
+    let (mut y1, mut y2) = (u32x4::load(state, 4), u32x4::load(state2, 4));
+    let (mut z1, mut z2) = (u32x4::load(state, 8), u32x4::load(state2, 8));
 
     let mut x = _mm256_loadu2_m128i(&x1 as *const _ as _, &x2 as *const _ as _);
     let mut y = _mm256_loadu2_m128i(&y1 as *const _ as _, &y2 as *const _ as _);
@@ -64,11 +64,11 @@ pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH * 2]) {
     _mm256_storeu2_m128i(&mut z1 as *mut _ as _, &mut z2 as *mut _ as _, z);
 
     x1.store(state, 0);
-    x2.store(state, 12);
     y1.store(state, 4);
-    y2.store(state, 16);
     z1.store(state, 8);
-    z2.store(state, 20);
+    x2.store(state2, 0);
+    y2.store(state2, 4);
+    z2.store(state2, 8);
 }
 
 

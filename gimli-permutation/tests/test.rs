@@ -50,20 +50,34 @@ fn test_gimli_ssse3() {
 #[cfg(target_feature = "avx2")]
 #[test]
 fn test_gimli_avx2() {
-    let mut data = [0; BLOCK_LENGTH * 2];
-    data[..BLOCK_LENGTH].copy_from_slice(&INPUT);
+    let mut data = [0; BLOCK_LENGTH];
+    let mut data2 = [0; BLOCK_LENGTH];
+    data.copy_from_slice(&INPUT);
 
     unsafe {
-        gimli_permutation::avx2::gimli(&mut data);
+        gimli_permutation::avx2::gimli(&mut data, &mut data2);
     }
-    assert_eq!(&data[..BLOCK_LENGTH], OUTPUT);
+    assert_eq!(data, OUTPUT);
 
 
-    let mut data = [0; BLOCK_LENGTH * 2];
-    data[BLOCK_LENGTH..].copy_from_slice(&INPUT);
+    let mut data = [0; BLOCK_LENGTH];
+    let mut data2 = [0; BLOCK_LENGTH];
+    data2.copy_from_slice(&INPUT);
 
     unsafe {
-        gimli_permutation::avx2::gimli(&mut data);
+        gimli_permutation::avx2::gimli(&mut data, &mut data2);
     }
-    assert_eq!(&data[BLOCK_LENGTH..], OUTPUT);
+    assert_eq!(data2, OUTPUT);
+
+
+    let mut data = [0; BLOCK_LENGTH];
+    let mut data2 = [0; BLOCK_LENGTH];
+    data.copy_from_slice(&INPUT);
+    data2.copy_from_slice(&INPUT);
+
+    unsafe {
+        gimli_permutation::avx2::gimli(&mut data, &mut data2);
+    }
+    assert_eq!(data, OUTPUT);
+    assert_eq!(data2, OUTPUT);
 }

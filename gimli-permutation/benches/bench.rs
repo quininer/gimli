@@ -38,9 +38,10 @@ fn bench_gimli_ssse3(b: &mut Bencher) {
 fn bench_gimli_avx2(b: &mut Bencher) {
     use gimli_permutation::avx2;
 
-    let mut data = [42; BLOCK_LENGTH * 2];
+    let mut data = [42; BLOCK_LENGTH];
+    let mut data2 = [42; BLOCK_LENGTH];
 
     b.iter(|| unsafe {
-        avx2::gimli(&mut data);
+        avx2::gimli(&mut data, &mut data2);
     });
 }

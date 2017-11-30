@@ -52,11 +52,11 @@ impl GimliHash {
     #[inline]
     fn gimli(state: &mut State) {
         #[inline]
-        fn array_to_block(arr: &mut [u8; BLOCK_LENGTH * 4]) -> &mut [u32; BLOCK_LENGTH] {
+        fn array_as_block(arr: &mut [u8; BLOCK_LENGTH * 4]) -> &mut [u32; BLOCK_LENGTH] {
             unsafe { mem::transmute(arr) }
         }
 
-        let state = array_to_block(state);
+        let state = array_as_block(state);
         LittleEndian::from_slice_u32(state);
         gimli(state);
         LittleEndian::from_slice_u32(state);
