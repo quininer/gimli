@@ -12,6 +12,7 @@ pub const RATE: usize = 16;
 type State = [u8; BLOCK_LENGTH * 4];
 
 
+#[derive(Clone)]
 pub struct GimliHash {
     state: State,
     pos: usize
@@ -20,15 +21,6 @@ pub struct GimliHash {
 impl Default for GimliHash {
     fn default() -> Self {
         GimliHash { state: [0; BLOCK_LENGTH * 4], pos: 0 }
-    }
-}
-
-impl Clone for GimliHash {
-    fn clone(&self) -> Self {
-        let mut gimli = GimliHash::default();
-        gimli.state.copy_from_slice(&self.state);
-        gimli.pos = self.pos;
-        gimli
     }
 }
 

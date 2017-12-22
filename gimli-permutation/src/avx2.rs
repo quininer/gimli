@@ -1,4 +1,4 @@
-use coresimd::simd::{ u32x4, u32x8, i32x8 };
+use coresimd::simd::{ u32x4, u32x8 };
 use coresimd::vendor::{
     _mm256_loadu2_m128i, _mm256_storeu2_m128i,
     _mm256_shuffle_epi8, _mm256_set_epi8,
@@ -23,23 +23,23 @@ pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH], state2: &mut [u32; BLOCK_LE
     let (mut y1, mut y2) = (u32x4::load(state, 4), u32x4::load(state2, 4));
     let (mut z1, mut z2) = (u32x4::load(state, 8), u32x4::load(state2, 8));
 
-    let mut x = _mm256_loadu2_m128i(&x1 as *const _ as _, &x2 as *const _ as _);
-    let mut y = _mm256_loadu2_m128i(&y1 as *const _ as _, &y2 as *const _ as _);
-    let mut z = _mm256_loadu2_m128i(&z1 as *const _ as _, &z2 as *const _ as _);
+    let mut x = u32x8::from(_mm256_loadu2_m128i(&x1 as *const _ as _, &x2 as *const _ as _));
+    let mut y = u32x8::from(_mm256_loadu2_m128i(&y1 as *const _ as _, &y2 as *const _ as _));
+    let mut z = u32x8::from(_mm256_loadu2_m128i(&z1 as *const _ as _, &z2 as *const _ as _));
 
     macro_rules! round {
         () => {
             x = _mm256_shuffle_epi8(
-                x.as_u8x32(),
+                x.into(),
                 _mm256_set_epi8(
                     12, 15, 14, 13, 8,  11, 10, 9,  4,  7,  6,  5,  0,  3,  2,  1,
                     28, 31, 30, 29, 24, 27, 26, 25, 20, 23, 22, 21, 16, 19, 18, 17
                 ).as_u8x32()
-            ).as_i8x32();
+            ).into();
             y = (shift(y.into(), 9) | _mm256_srli_epi32(y.into(), 32 - 9)).into();
-            let newz = i32x8::from(x)   ^ shift(z.into(), 1)    ^ shift((y & z).into(), 2);
-            let newy = y                ^ x                     ^ shift((x | z).into(), 1).into();
-            x =        z                ^ y                     ^ shift((x & y).into(), 3).into();
+            let newz = x.as_i32x8() ^ shift(z.into(), 1)    ^ shift((y & z).into(), 2);
+            let newy = y            ^ x                     ^ shift((x | z).into(), 1).into();
+            x =        z            ^ y                     ^ shift((x & y).into(), 3).into();
             y = newy;
             z = newz.into();
         }
@@ -59,9 +59,9 @@ pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH], state2: &mut [u32; BLOCK_LE
         round!();
     }
 
-    _mm256_storeu2_m128i(&mut x1 as *mut _ as _, &mut x2 as *mut _ as _, x);
-    _mm256_storeu2_m128i(&mut y1 as *mut _ as _, &mut y2 as *mut _ as _, y);
-    _mm256_storeu2_m128i(&mut z1 as *mut _ as _, &mut z2 as *mut _ as _, z);
+    _mm256_storeu2_m128i(&mut x1 as *mut _ as _, &mut x2 as *mut _ as _, x.into());
+    _mm256_storeu2_m128i(&mut y1 as *mut _ as _, &mut y2 as *mut _ as _, y.into());
+    _mm256_storeu2_m128i(&mut z1 as *mut _ as _, &mut z2 as *mut _ as _, z.into());
 
     x1.store(state, 0);
     y1.store(state, 4);
