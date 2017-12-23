@@ -11,7 +11,7 @@ fn test_hash() {
         ( @ $input:expr, $output:expr ) => {
             let mut output = [0; 32];
             let mut hasher = GimliHash::default();
-            hasher.input($input.as_bytes());
+            hasher.update($input.as_bytes());
             hasher.finalize(&mut output);
             assert_eq!(hex::decode($output).unwrap(), output, "{}", $input);
         };
@@ -34,4 +34,30 @@ fn test_hash() {
         ""
             => "b0634b2c0b082aedc5c0a2fe4ee3adcfc989ec05de6f00addb04b3aaac271f67"
     };
+}
+
+#[test]
+fn test_xof() {
+    for i in 10..30 {
+        let input = (100..).take(i).collect::<Vec<_>>();
+        let mut output1 = vec![0; i];
+        let mut output2 = vec![0; i];
+
+        let mut hasher = GimliHash::default();
+        hasher.update(&input);
+        hasher.finalize(&mut output1);
+
+        {
+            let mut hasher = GimliHash::default();
+            let (r, l) = input.split_at(i / 2 - 1);
+            hasher.update(r);
+            hasher.update(l);
+            let (r, l) = output2.split_at_mut(i / 2 - 1);
+            let mut xof = hasher.xof();
+            xof.squeeze(r);
+            xof.squeeze(l);
+        }
+
+        assert_eq!(output1, output2);
+    }
 }

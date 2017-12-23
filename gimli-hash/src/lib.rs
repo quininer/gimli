@@ -26,6 +26,12 @@ impl Default for GimliHash {
 
 impl GimliHash {
     #[inline]
+    pub fn update(&mut self, buf: &[u8]) {
+        self.absorb(buf);
+    }
+
+    #[deprecated(since="0.1.1", note="please use `update` instead")]
+    #[inline]
     pub fn input(&mut self, buf: &[u8]) {
         self.absorb(buf);
     }
@@ -91,14 +97,27 @@ pub struct XofReader {
 
 impl XofReader {
     pub fn squeeze(&mut self, buf: &mut [u8]) {
-        for chunk in buf.chunks_mut(RATE) {
-            let len = chunk.len();
-            chunk.copy_from_slice(&self.state[self.pos..][..len]);
-            self.pos += len;
+        let take = cmp::min(RATE - self.pos, buf.len());
+        let (prefix, buf) = buf.split_at_mut(take);
+
+        if !prefix.is_empty() {
+            prefix.copy_from_slice(&self.state[self.pos..][..take]);
+            self.pos += take;
 
             if self.pos == RATE {
                 GimliHash::gimli(&mut self.state);
                 self.pos = 0;
+            }
+        }
+
+        for chunk in buf.chunks_mut(RATE) {
+            let take = chunk.len();
+            chunk.copy_from_slice(&self.state[self.pos..][..take]);
+
+            if self.pos == RATE {
+                GimliHash::gimli(&mut self.state);
+            } else {
+                self.pos += take;
             }
         }
     }

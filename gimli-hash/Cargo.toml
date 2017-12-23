@@ -1,8 +1,8 @@
 [package]
 name = "gimli-hash"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["quininer <quininer@live.com>"]
-description = "The Gimli-Hash"
+description = "The Gimli-permutation based Hash"
 repository = "https://github.com/quininer/gimli"
 license = "MIT"
 
