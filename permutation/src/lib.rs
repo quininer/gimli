@@ -20,7 +20,7 @@ pub const BLOCK_LENGTH: usize = 12;
 pub use portable::gimli;
 
 #[cfg(feature = "simd")]
-#[inline(always)]
+#[inline]
 pub fn gimli(state: &mut [u32; BLOCK_LENGTH]) {
     #[cfg(target_feature = "ssse3")] {
         if cfg_feature_enabled!("ssse3") {
@@ -36,7 +36,7 @@ pub fn gimli(state: &mut [u32; BLOCK_LENGTH]) {
 }
 
 #[cfg(feature = "simd")]
-#[inline(always)]
+#[inline]
 pub fn gimlix2(state: &mut [u32; BLOCK_LENGTH], state2: &mut [u32; BLOCK_LENGTH]) {
     #[cfg(target_feature = "avx2")] {
         if cfg_feature_enabled!("avx2") {
@@ -54,7 +54,7 @@ pub fn gimlix2(state: &mut [u32; BLOCK_LENGTH], state2: &mut [u32; BLOCK_LENGTH]
 }
 
 #[cfg(not(feature = "simd"))]
-#[inline(always)]
+#[inline]
 pub fn gimlix2(state: &mut [u32; BLOCK_LENGTH], state2: &mut [u32; BLOCK_LENGTH]) {
     gimli(state);
     gimli(state2);
