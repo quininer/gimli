@@ -8,11 +8,11 @@ license = "MIT"
 
 
 [features]
-# simd = [ "gimli-permutation/simd" ]
+simd = [ "gimli-permutation/simd" ]
 
 [dependencies]
 byteorder = { version = "1", default-features = false }
-gimli-permutation = "0.1"
+gimli-permutation = { version = "0.1", path = "../permutation" }
 
 [dev-dependencies]
 hex = "0.3"

@@ -48,7 +48,7 @@ impl Iterator for R {
             None
         } else {
             let i = self.0.start;
-            self.0.start = self.0.start.wrapping_sub(1);
+            self.0.start -= 1;
             Some(i)
         }
     }
