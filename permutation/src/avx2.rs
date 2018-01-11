@@ -1,10 +1,9 @@
 use coresimd::simd::{ u32x4, u32x8 };
 use coresimd::vendor::{
     _mm256_loadu2_m128i, _mm256_storeu2_m128i,
-    _mm256_shuffle_epi8, _mm256_set_epi8,
-    _mm256_srli_epi32, _mm256_shuffle_epi32,
-
-    _mm256_slli_epi32 as shift
+    _mm256_shuffle_epi8, _mm256_shuffle_epi32,
+    _mm256_set_epi8,
+    _mm256_srli_epi32, _mm256_slli_epi32
 };
 use ::BLOCK_LENGTH;
 
@@ -36,12 +35,12 @@ pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH], state2: &mut [u32; BLOCK_LE
                     28, 31, 30, 29, 24, 27, 26, 25, 20, 23, 22, 21, 16, 19, 18, 17
                 ).as_u8x32()
             ).into();
-            y = (shift(y.into(), 9) | _mm256_srli_epi32(y.into(), 32 - 9)).into();
-            let newz = x.as_i32x8() ^ shift(z.into(), 1)    ^ shift((y & z).into(), 2);
-            let newy = y            ^ x                     ^ shift((x | z).into(), 1).into();
-            x =        z            ^ y                     ^ shift((x & y).into(), 3).into();
+            y = shift_left(y, 9) | shift_right(y, 32 - 9);
+            let newz = x ^ shift_left(z, 1) ^ shift_left(y & z, 2);
+            let newy = y ^ x                ^ shift_left(x | z, 1);
+            x =        z ^ y                ^ shift_left(x & y, 3);
             y = newy;
-            z = newz.into();
+            z = newz;
         }
     }
 
@@ -75,4 +74,14 @@ pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH], state2: &mut [u32; BLOCK_LE
 #[inline]
 fn shuffle(fp3: i32, fp2: i32, fp1: i32, fp0: i32) -> i32 {
     (fp3 << 6) | (fp2 << 4) | (fp1 << 2) | fp0
+}
+
+#[inline]
+unsafe fn shift_right(a: u32x8, imm8: i32) -> u32x8 {
+    _mm256_srli_epi32(a.into(), imm8).into()
+}
+
+#[inline]
+unsafe fn shift_left(a: u32x8, imm8: i32) -> u32x8 {
+    _mm256_slli_epi32(a.into(), imm8).into()
 }
