@@ -17,7 +17,14 @@ const COEFFS: [u32x8; 6] = [
     u32x8::new(0x9e37_7918, 0, 0, 0, 0x9e37_7918, 0, 0, 0),
 ];
 
+
+#[deprecated(since="0.1.1", note="please use `avx2::gimli_x2` instead")]
+#[inline]
 pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH], state2: &mut [u32; BLOCK_LENGTH]) {
+    gimli_x2(state, state2)
+}
+
+pub unsafe fn gimli_x2(state: &mut [u32; BLOCK_LENGTH], state2: &mut [u32; BLOCK_LENGTH]) {
     let (mut x1, mut x2) = (u32x4::load(state, 0), u32x4::load(state2, 0));
     let (mut y1, mut y2) = (u32x4::load(state, 4), u32x4::load(state2, 4));
     let (mut z1, mut z2) = (u32x4::load(state, 8), u32x4::load(state2, 8));
@@ -48,7 +55,7 @@ pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH], state2: &mut [u32; BLOCK_LE
         round!();
 
         x = _mm256_shuffle_epi32(x.into(), shuffle(2, 3, 0, 1)).into();
-        x ^= round.into();
+        x ^= round;
 
         round!();
         round!();

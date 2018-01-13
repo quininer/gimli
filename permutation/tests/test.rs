@@ -55,7 +55,7 @@ fn test_gimli_avx2() {
     data.copy_from_slice(&INPUT);
 
     unsafe {
-        gimli_permutation::avx2::gimli(&mut data, &mut data2);
+        gimli_permutation::avx2::gimli_x2(&mut data, &mut data2);
     }
     assert_eq!(data, OUTPUT);
 
@@ -65,7 +65,7 @@ fn test_gimli_avx2() {
     data2.copy_from_slice(&INPUT);
 
     unsafe {
-        gimli_permutation::avx2::gimli(&mut data, &mut data2);
+        gimli_permutation::avx2::gimli_x2(&mut data, &mut data2);
     }
     assert_eq!(data2, OUTPUT);
 
@@ -76,7 +76,7 @@ fn test_gimli_avx2() {
     data2.copy_from_slice(&INPUT);
 
     unsafe {
-        gimli_permutation::avx2::gimli(&mut data, &mut data2);
+        gimli_permutation::avx2::gimli_x2(&mut data, &mut data2);
     }
     assert_eq!(data, OUTPUT);
     assert_eq!(data2, OUTPUT);

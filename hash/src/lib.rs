@@ -48,7 +48,7 @@ impl GimliHash {
     }
 
     #[inline]
-    fn gimli(state: &mut State) {
+    fn permutation(state: &mut State) {
         #[inline]
         fn array_as_block(arr: &mut [u8; BLOCK_LENGTH * 4]) -> &mut [u32; BLOCK_LENGTH] {
             unsafe { mem::transmute(arr) }
@@ -76,7 +76,7 @@ impl GimliHash {
             len -= take;
 
             if self.pos == RATE {
-                Self::gimli(&mut self.state);
+                Self::permutation(&mut self.state);
                 self.pos = 0;
             }
         }
@@ -85,7 +85,7 @@ impl GimliHash {
     fn pad(&mut self) {
         self.state[self.pos] ^= 0x1f;
         self.state[RATE - 1] ^= 0x80;
-        Self::gimli(&mut self.state);
+        Self::permutation(&mut self.state);
     }
 }
 
@@ -105,7 +105,7 @@ impl XofReader {
             self.pos += take;
 
             if self.pos == RATE {
-                GimliHash::gimli(&mut self.state);
+                GimliHash::permutation(&mut self.state);
                 self.pos = 0;
             }
         }
@@ -115,7 +115,7 @@ impl XofReader {
             chunk.copy_from_slice(&self.state[self.pos..][..take]);
 
             if self.pos == RATE {
-                GimliHash::gimli(&mut self.state);
+                GimliHash::permutation(&mut self.state);
             } else {
                 self.pos += take;
             }
