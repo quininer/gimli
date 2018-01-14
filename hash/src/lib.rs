@@ -30,12 +30,6 @@ impl GimliHash {
         self.absorb(buf);
     }
 
-    #[deprecated(since="0.1.1", note="please use `update` instead")]
-    #[inline]
-    pub fn input(&mut self, buf: &[u8]) {
-        self.absorb(buf);
-    }
-
     #[inline]
     pub fn finalize(self, buf: &mut [u8]) {
         self.xof().squeeze(buf);

@@ -1,6 +1,6 @@
 [package]
 name = "gimli-hash"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["quininer <quininer@live.com>"]
 description = "The Gimli-permutation based Hash"
 repository = "https://github.com/quininer/gimli"
