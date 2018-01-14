@@ -4,6 +4,8 @@ version = "0.1.1"
 authors = ["quininer <quininer@live.com>"]
 description = "The Gimli-permutation based Hash"
 repository = "https://github.com/quininer/gimli"
+keywords = [ "lightweight", "hash", "cryptography" ]
+categories = [ "cryptography", "no-std" ]
 license = "MIT"
 
 

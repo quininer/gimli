@@ -1,9 +1,11 @@
 [package]
 name = "gimli-permutation"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["quininer <quininer@live.com>"]
 description = "Gimli: a cross-platform permutation"
 repository = "https://github.com/quininer/gimli"
+keywords = [ "permutation", "cryptography", "simd" ]
+categories = [ "cryptography", "no-std" ]
 license = "MIT"
 
 
@@ -11,4 +13,4 @@ license = "MIT"
 simd = [ "coresimd" ]
 
 [dependencies]
-coresimd = { git = "https://github.com/rust-lang-nursery/stdsimd", optional = true }
+coresimd = { version = "0.0.4", optional = true }

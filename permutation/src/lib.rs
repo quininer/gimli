@@ -24,7 +24,8 @@ pub const BLOCK_LENGTH: usize = S;
 #[inline]
 pub fn gimli(state: &mut [u32; S]) {
     #[cfg(feature = "simd")]
-    #[cfg(target_feature = "ssse3")] unsafe {
+    #[cfg(target_feature = "ssse3")]
+    unsafe {
         if cfg_feature_enabled!("ssse3") {
             return ssse3::gimli(state);
         }
