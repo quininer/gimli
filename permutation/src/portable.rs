@@ -1,9 +1,9 @@
 use core::ops::Range;
-use ::BLOCK_LENGTH;
+use ::S;
 
 
 #[cfg_attr(feature = "cargo-clippy", allow(identity_op, erasing_op))]
-pub fn gimli(state: &mut [u32; BLOCK_LENGTH]) {
+pub fn gimli(state: &mut [u32; S]) {
     for round in R(24..0) {
         // SP-box
         for column in 0..4 {

@@ -16,14 +16,14 @@ pub mod ssse3;
 pub mod avx2;
 
 
-pub const BLOCK_LENGTH: usize = 12;
+pub const S: usize = 12;
 
-#[cfg(not(feature = "simd"))]
-pub use portable::gimli;
+#[deprecated(since="0.1.1", note="please use `S` instead")]
+pub const BLOCK_LENGTH: usize = S;
 
-#[cfg(feature = "simd")]
 #[inline]
-pub fn gimli(state: &mut [u32; BLOCK_LENGTH]) {
+pub fn gimli(state: &mut [u32; S]) {
+    #[cfg(feature = "simd")]
     #[cfg(target_feature = "ssse3")] unsafe {
         if cfg_feature_enabled!("ssse3") {
             return ssse3::gimli(state);
@@ -35,26 +35,20 @@ pub fn gimli(state: &mut [u32; BLOCK_LENGTH]) {
 
 #[deprecated(since="0.1.1", note="please use `gimli_x2` instead")]
 #[inline]
-pub fn gimlix2(state: &mut [u32; BLOCK_LENGTH], state2: &mut [u32; BLOCK_LENGTH]) {
+pub fn gimlix2(state: &mut [u32; S], state2: &mut [u32; S]) {
     gimli_x2(state, state2)
 }
 
-#[cfg(feature = "simd")]
 #[inline]
-pub fn gimli_x2(state: &mut [u32; BLOCK_LENGTH], state2: &mut [u32; BLOCK_LENGTH]) {
-    #[cfg(target_feature = "avx2")] unsafe {
+pub fn gimli_x2(state: &mut [u32; S], state2: &mut [u32; S]) {
+    #[cfg(feature = "simd")]
+    #[cfg(target_feature = "avx2")]
+    unsafe {
         if cfg_feature_enabled!("avx2") {
             return avx2::gimli_x2(state, state2);
         }
     }
 
-    gimli(state);
-    gimli(state2);
-}
-
-#[cfg(not(feature = "simd"))]
-#[inline]
-pub fn gimli_x2(state: &mut [u32; BLOCK_LENGTH], state2: &mut [u32; BLOCK_LENGTH]) {
     gimli(state);
     gimli(state2);
 }

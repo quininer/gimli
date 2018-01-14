@@ -5,11 +5,11 @@ extern crate gimli_permutation;
 
 use core::{ cmp, mem };
 use byteorder::{ ByteOrder, LittleEndian };
-use gimli_permutation::{ BLOCK_LENGTH, gimli };
+use gimli_permutation::{ S, gimli };
 
 
 pub const RATE: usize = 16;
-type State = [u8; BLOCK_LENGTH * 4];
+type State = [u8; S * 4];
 
 
 #[derive(Clone)]
@@ -20,7 +20,7 @@ pub struct GimliHash {
 
 impl Default for GimliHash {
     fn default() -> Self {
-        GimliHash { state: [0; BLOCK_LENGTH * 4], pos: 0 }
+        GimliHash { state: [0; S * 4], pos: 0 }
     }
 }
 
@@ -50,7 +50,7 @@ impl GimliHash {
     #[inline]
     fn permutation(state: &mut State) {
         #[inline]
-        fn array_as_block(arr: &mut [u8; BLOCK_LENGTH * 4]) -> &mut [u32; BLOCK_LENGTH] {
+        fn array_as_block(arr: &mut [u8; S * 4]) -> &mut [u32; S] {
             unsafe { mem::transmute(arr) }
         }
 

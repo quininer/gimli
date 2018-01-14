@@ -5,7 +5,7 @@ use coresimd::vendor::{
     _mm256_set_epi8,
     _mm256_srli_epi32, _mm256_slli_epi32
 };
-use ::BLOCK_LENGTH;
+use ::S;
 
 
 const COEFFS: [u32x8; 6] = [
@@ -20,11 +20,11 @@ const COEFFS: [u32x8; 6] = [
 
 #[deprecated(since="0.1.1", note="please use `avx2::gimli_x2` instead")]
 #[inline]
-pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH], state2: &mut [u32; BLOCK_LENGTH]) {
+pub unsafe fn gimli(state: &mut [u32; S], state2: &mut [u32; S]) {
     gimli_x2(state, state2)
 }
 
-pub unsafe fn gimli_x2(state: &mut [u32; BLOCK_LENGTH], state2: &mut [u32; BLOCK_LENGTH]) {
+pub unsafe fn gimli_x2(state: &mut [u32; S], state2: &mut [u32; S]) {
     let (mut x1, mut x2) = (u32x4::load(state, 0), u32x4::load(state2, 0));
     let (mut y1, mut y2) = (u32x4::load(state, 4), u32x4::load(state2, 4));
     let (mut z1, mut z2) = (u32x4::load(state, 8), u32x4::load(state2, 8));

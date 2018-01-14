@@ -4,7 +4,7 @@ use coresimd::vendor::{
     _mm_set_epi8,
     _mm_srli_epi32, _mm_slli_epi32
 };
-use ::BLOCK_LENGTH;
+use ::S;
 
 
 
@@ -13,7 +13,7 @@ const COEFFS: [u32x4; 6] = [
     u32x4::new(0x9e37_7910, 0, 0, 0), u32x4::new(0x9e37_7914, 0, 0, 0), u32x4::new(0x9e37_7918, 0, 0, 0)
 ];
 
-pub unsafe fn gimli(state: &mut [u32; BLOCK_LENGTH]) {
+pub unsafe fn gimli(state: &mut [u32; S]) {
     let mut x = u32x4::load(state, 0);
     let mut y = u32x4::load(state, 4);
     let mut z = u32x4::load(state, 8);
