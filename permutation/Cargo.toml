@@ -8,9 +8,5 @@ keywords = [ "permutation", "cryptography", "simd" ]
 categories = [ "cryptography", "no-std" ]
 license = "MIT"
 
-
 [features]
-simd = [ "coresimd" ]
-
-[dependencies]
-coresimd = { version = "0.0.4", optional = true }
+simd = []

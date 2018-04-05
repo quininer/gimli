@@ -1,9 +1,5 @@
 #![no_std]
-#![cfg_attr(feature = "simd", feature(cfg_target_feature))]
-
-#[cfg(feature = "simd")]
-#[macro_use]
-extern crate coresimd;
+#![cfg_attr(feature = "simd", feature(cfg_target_feature, stdsimd))]
 
 pub mod portable;
 
@@ -26,9 +22,9 @@ pub fn gimli(state: &mut [u32; S]) {
     #[cfg(feature = "simd")]
     #[cfg(target_feature = "ssse3")]
     unsafe {
-        if cfg_feature_enabled!("ssse3") {
-            return ssse3::gimli(state);
-        }
+//        if is_x86_feature_detected!("ssse3") {
+//            return ssse3::gimli(state);
+//        }
     }
 
     portable::gimli(state)
@@ -45,9 +41,9 @@ pub fn gimli_x2(state: &mut [u32; S], state2: &mut [u32; S]) {
     #[cfg(feature = "simd")]
     #[cfg(target_feature = "avx2")]
     unsafe {
-        if cfg_feature_enabled!("avx2") {
-            return avx2::gimli_x2(state, state2);
-        }
+//        if is_x86_feature_detected!("avx2") {
+//            return avx2::gimli_x2(state, state2);
+//        }
     }
 
     gimli(state);
