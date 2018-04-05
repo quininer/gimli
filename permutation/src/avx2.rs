@@ -40,10 +40,11 @@ pub unsafe fn gimli(state: &mut [u32; S], state2: &mut [u32; S]) {
     gimli_x2(state, state2)
 }
 
+#[target_feature(enable = "avx2")]
 pub unsafe fn gimli_x2(state: &mut [u32; S], state2: &mut [u32; S]) {
-    let (mut x1, mut x2) = (u32x4::load_aligned(&state[0..]), u32x4::load_aligned(&state2[0..]));
-    let (mut y1, mut y2) = (u32x4::load_aligned(&state[4..]), u32x4::load_aligned(&state2[4..]));
-    let (mut z1, mut z2) = (u32x4::load_aligned(&state[8..]), u32x4::load_aligned(&state2[8..]));
+    let (mut x1, mut x2) = (u32x4::load_unaligned(&state[0..]), u32x4::load_unaligned(&state2[0..]));
+    let (mut y1, mut y2) = (u32x4::load_unaligned(&state[4..]), u32x4::load_unaligned(&state2[4..]));
+    let (mut z1, mut z2) = (u32x4::load_unaligned(&state[8..]), u32x4::load_unaligned(&state2[8..]));
 
     let mut x = u32x8::from_bits(_mm256_loadu2_m128i(&x1 as *const _ as _, &x2 as *const _ as _));
     let mut y = u32x8::from_bits(_mm256_loadu2_m128i(&y1 as *const _ as _, &y2 as *const _ as _));
@@ -85,10 +86,10 @@ pub unsafe fn gimli_x2(state: &mut [u32; S], state2: &mut [u32; S]) {
     _mm256_storeu2_m128i(&mut y1 as *mut _ as _, &mut y2 as *mut _ as _, y.into_bits());
     _mm256_storeu2_m128i(&mut z1 as *mut _ as _, &mut z2 as *mut _ as _, z.into_bits());
 
-    x1.store_aligned(&mut state[0..]);
-    y1.store_aligned(&mut state[4..]);
-    z1.store_aligned(&mut state[8..]);
-    x2.store_aligned(&mut state2[0..]);
-    y2.store_aligned(&mut state2[4..]);
-    z2.store_aligned(&mut state2[8..]);
+    x1.store_unaligned(&mut state[0..]);
+    y1.store_unaligned(&mut state[4..]);
+    z1.store_unaligned(&mut state[8..]);
+    x2.store_unaligned(&mut state2[0..]);
+    y2.store_unaligned(&mut state2[4..]);
+    z2.store_unaligned(&mut state2[8..]);
 }

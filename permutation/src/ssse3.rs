@@ -28,10 +28,11 @@ const COEFFS: [u32x4; 6] = [
     u32x4::new(0x9e37_7910, 0, 0, 0), u32x4::new(0x9e37_7914, 0, 0, 0), u32x4::new(0x9e37_7918, 0, 0, 0)
 ];
 
+#[target_feature(enable = "ssse3")]
 pub unsafe fn gimli(state: &mut [u32; S]) {
-    let mut x = u32x4::load_aligned(&state[0..]);
-    let mut y = u32x4::load_aligned(&state[4..]);
-    let mut z = u32x4::load_aligned(&state[8..]);
+    let mut x = u32x4::load_unaligned(&state[0..]);
+    let mut y = u32x4::load_unaligned(&state[4..]);
+    let mut z = u32x4::load_unaligned(&state[8..]);
 
     macro_rules! round {
         () => {
@@ -62,7 +63,7 @@ pub unsafe fn gimli(state: &mut [u32; S]) {
         round!();
     }
 
-    x.store_aligned(&mut state[0..]);
-    y.store_aligned(&mut state[4..]);
-    z.store_aligned(&mut state[8..]);
+    x.store_unaligned(&mut state[0..]);
+    y.store_unaligned(&mut state[4..]);
+    z.store_unaligned(&mut state[8..]);
 }
