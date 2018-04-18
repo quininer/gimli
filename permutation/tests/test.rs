@@ -1,5 +1,4 @@
 #![cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
-#![cfg_attr(feature = "simd", feature(cfg_target_feature))]
 
 extern crate gimli_permutation;
 

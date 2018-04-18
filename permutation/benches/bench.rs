@@ -1,5 +1,4 @@
 #![feature(test)]
-#![cfg_attr(feature = "simd", feature(cfg_target_feature))]
 
 extern crate test;
 extern crate gimli_permutation;

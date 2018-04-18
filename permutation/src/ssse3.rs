@@ -1,5 +1,4 @@
-use core::simd::u32x4;
-use core::simd::{ FromBits, IntoBits };
+use core::simd::{ FromBits, IntoBits, u32x4 };
 use core::arch::x86_64::{
     _mm_shuffle_epi8, _mm_shuffle_epi32,
     _mm_set_epi8,
@@ -15,10 +14,10 @@ macro_rules! shuffle {
 }
 
 macro_rules! shift {
-    ( right $a:expr, $imm8:expr ) => {
+    ( >> $a:expr, $imm8:expr ) => {
         u32x4::from_bits(_mm_srli_epi32($a.into_bits(), $imm8))
     };
-    ( left $a:expr, $imm8:expr ) => {
+    ( << $a:expr, $imm8:expr ) => {
         u32x4::from_bits(_mm_slli_epi32($a.into_bits(), $imm8))
     }
 }
@@ -28,7 +27,6 @@ const COEFFS: [u32x4; 6] = [
     u32x4::new(0x9e37_7910, 0, 0, 0), u32x4::new(0x9e37_7914, 0, 0, 0), u32x4::new(0x9e37_7918, 0, 0, 0)
 ];
 
-#[target_feature(enable = "ssse3")]
 pub unsafe fn gimli(state: &mut [u32; S]) {
     let mut x = u32x4::load_unaligned(&state[0..]);
     let mut y = u32x4::load_unaligned(&state[4..]);
@@ -40,10 +38,10 @@ pub unsafe fn gimli(state: &mut [u32; S]) {
                 x.into_bits(),
                 _mm_set_epi8(12, 15, 14, 13, 8, 11, 10, 9, 4, 7, 6, 5, 0, 3, 2, 1).into_bits()
             ).into_bits();
-            y = shift!(left y, 9) | shift!(right y, 32 - 9);
-            let newz = x ^ shift!(left z, 1) ^ shift!(left y & z, 2);
-            let newy = y ^ x                ^ shift!(left x | z, 1);
-            x =        z ^ y                ^ shift!(left x & y, 3);
+            y = shift!(<< y, 9) | shift!(>> y, 32 - 9);
+            let newz = x ^ shift!(<< z, 1)  ^ shift!(<< y & z, 2);
+            let newy = y ^ x                ^ shift!(<< x | z, 1);
+            x =        z ^ y                ^ shift!(<< x & y, 3);
             y = newy;
             z = newz;
         }

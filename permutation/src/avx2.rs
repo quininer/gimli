@@ -1,5 +1,4 @@
-use core::simd::{ u32x4, u32x8 };
-use core::simd::{ FromBits, IntoBits };
+use core::simd::{ FromBits, IntoBits, u32x4, u32x8 };
 use core::arch::x86_64::{
     _mm256_loadu2_m128i, _mm256_storeu2_m128i,
     _mm256_shuffle_epi8, _mm256_shuffle_epi32,
@@ -16,10 +15,10 @@ macro_rules! shuffle {
 }
 
 macro_rules! shift {
-    ( right $a:expr, $imm8:expr ) => {
+    ( >> $a:expr, $imm8:expr ) => {
         u32x8::from_bits(_mm256_srli_epi32($a.into_bits(), $imm8))
     };
-    ( left $a:expr, $imm8:expr ) => {
+    ( << $a:expr, $imm8:expr ) => {
         u32x8::from_bits(_mm256_slli_epi32($a.into_bits(), $imm8))
     }
 }
@@ -40,7 +39,6 @@ pub unsafe fn gimli(state: &mut [u32; S], state2: &mut [u32; S]) {
     gimli_x2(state, state2)
 }
 
-#[target_feature(enable = "avx2")]
 pub unsafe fn gimli_x2(state: &mut [u32; S], state2: &mut [u32; S]) {
     let (mut x1, mut x2) = (u32x4::load_unaligned(&state[0..]), u32x4::load_unaligned(&state2[0..]));
     let (mut y1, mut y2) = (u32x4::load_unaligned(&state[4..]), u32x4::load_unaligned(&state2[4..]));
@@ -59,10 +57,10 @@ pub unsafe fn gimli_x2(state: &mut [u32; S], state2: &mut [u32; S]) {
                     28, 31, 30, 29, 24, 27, 26, 25, 20, 23, 22, 21, 16, 19, 18, 17
                 ).into_bits()
             ).into_bits();
-            y = shift!(left y, 9) | shift!(right y, 32 - 9);
-            let newz = x ^ shift!(left z, 1) ^ shift!(left y & z, 2);
-            let newy = y ^ x                ^ shift!(left x | z, 1);
-            x =        z ^ y                ^ shift!(left x & y, 3);
+            y = shift!(<< y, 9) | shift!(>> y, 32 - 9);
+            let newz = x ^ shift!(<< z, 1)  ^ shift!(<< y & z, 2);
+            let newy = y ^ x                ^ shift!(<< x | z, 1);
+            x =        z ^ y                ^ shift!(<< x & y, 3);
             y = newy;
             z = newz;
         }
