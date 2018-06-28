@@ -3,24 +3,23 @@
 extern crate byteorder;
 extern crate gimli_permutation;
 
-use core::{ cmp, mem };
+use core::cmp;
 use byteorder::{ ByteOrder, LittleEndian };
 use gimli_permutation::{ S, gimli };
 
 
 pub const RATE: usize = 16;
-type State = [u8; S * 4];
 
 
 #[derive(Clone)]
 pub struct GimliHash {
-    state: State,
+    state: [u32; S],
     pos: usize
 }
 
 impl Default for GimliHash {
     fn default() -> Self {
-        GimliHash { state: [0; S * 4], pos: 0 }
+        GimliHash { state: [0; S], pos: 0 }
     }
 }
 
@@ -41,78 +40,93 @@ impl GimliHash {
         XofReader { state: self.state, pos: 0 }
     }
 
-    #[inline]
-    fn permutation(state: &mut State) {
-        #[inline]
-        fn array_as_block(arr: &mut [u8; S * 4]) -> &mut [u32; S] {
-            unsafe { mem::transmute(arr) }
-        }
-
-        let state = array_as_block(state);
-        LittleEndian::from_slice_u32(state);
-        gimli(state);
-        LittleEndian::from_slice_u32(state);
-    }
-
     fn absorb(&mut self, buf: &[u8]) {
+        let GimliHash { state, pos } = self;
+
         let mut start = 0;
         let mut len = buf.len();
 
         while len > 0 {
-            let take = cmp::min(RATE - self.pos, len);
-            for (dst, &src) in self.state[self.pos..][..take].iter_mut()
-                .zip(&buf[start..][..take])
-            {
-                *dst ^= src;
-            }
-            self.pos += take;
-            start += take;
-            len -= take;
+            let take = cmp::min(RATE - *pos, len);
 
-            if self.pos == RATE {
-                Self::permutation(&mut self.state);
-                self.pos = 0;
+            with(state, |state| {
+                for (dst, &src) in state[*pos..][..take].iter_mut()
+                    .zip(&buf[start..][..take])
+                {
+                    *dst ^= src;
+                }
+                *pos += take;
+                start += take;
+                len -= take;
+            });
+
+            if *pos == RATE {
+                gimli(state);
+                *pos = 0;
             }
         }
     }
 
     fn pad(&mut self) {
-        self.state[self.pos] ^= 0x1f;
-        self.state[RATE - 1] ^= 0x80;
-        Self::permutation(&mut self.state);
+        let &mut GimliHash { ref mut state, pos } = self;
+
+        with(state, |state| {
+            state[pos] ^= 0x1f;
+            state[RATE - 1] ^= 0x80;
+        });
+        gimli(state);
     }
 }
 
 
 pub struct XofReader {
-    state: State,
+    state: [u32; S],
     pos: usize
 }
 
 impl XofReader {
     pub fn squeeze(&mut self, buf: &mut [u8]) {
-        let take = cmp::min(RATE - self.pos, buf.len());
+        let XofReader { state, pos } = self;
+
+        let take = cmp::min(RATE - *pos, buf.len());
         let (prefix, buf) = buf.split_at_mut(take);
 
         if !prefix.is_empty() {
-            prefix.copy_from_slice(&self.state[self.pos..][..take]);
-            self.pos += take;
+            with(state, |state| {
+                prefix.copy_from_slice(&state[*pos..][..take]);
+                *pos += take;
+            });
 
-            if self.pos == RATE {
-                GimliHash::permutation(&mut self.state);
-                self.pos = 0;
+            if *pos == RATE {
+                gimli(state);
+                *pos = 0;
             }
         }
 
         for chunk in buf.chunks_mut(RATE) {
             let take = chunk.len();
-            chunk.copy_from_slice(&self.state[self.pos..][..take]);
+            with(state, |state| {
+                chunk.copy_from_slice(&state[*pos..][..take]);
+            });
 
-            if self.pos == RATE {
-                GimliHash::permutation(&mut self.state);
+            if *pos == RATE {
+                gimli(state);
             } else {
-                self.pos += take;
+                *pos += take;
             }
         }
     }
+}
+
+fn with<F>(state: &mut [u32; S], f: F)
+    where F: FnOnce(&mut [u8; S * 4])
+{
+    #[inline]
+    fn transmute(arr: &mut [u32; S]) -> &mut [u8; S * 4] {
+        unsafe { &mut *(arr as *mut [u32; S] as *mut [u8; S * 4]) }
+    }
+
+    LittleEndian::from_slice_u32(state);
+    f(transmute(state));
+    LittleEndian::from_slice_u32(state);
 }
