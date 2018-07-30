@@ -1,9 +1,9 @@
-use core::simd::{ FromBits, IntoBits, u32x4 };
 use core::arch::x86_64::{
     _mm_shuffle_epi8, _mm_shuffle_epi32,
     _mm_set_epi8,
     _mm_srli_epi32, _mm_slli_epi32
 };
+use packed_simd::{ FromBits, IntoBits, u32x4 };
 use ::S;
 
 
@@ -28,9 +28,9 @@ const COEFFS: [u32x4; 6] = [
 ];
 
 pub unsafe fn gimli(state: &mut [u32; S]) {
-    let mut x = u32x4::load_unaligned(&state[0..]);
-    let mut y = u32x4::load_unaligned(&state[4..]);
-    let mut z = u32x4::load_unaligned(&state[8..]);
+    let mut x = u32x4::from_slice_unaligned(&state[0..]);
+    let mut y = u32x4::from_slice_unaligned(&state[4..]);
+    let mut z = u32x4::from_slice_unaligned(&state[8..]);
 
     macro_rules! round {
         () => {
@@ -61,7 +61,7 @@ pub unsafe fn gimli(state: &mut [u32; S]) {
         round!();
     }
 
-    x.store_unaligned(&mut state[0..]);
-    y.store_unaligned(&mut state[4..]);
-    z.store_unaligned(&mut state[8..]);
+    x.write_to_slice_unaligned(&mut state[0..]);
+    y.write_to_slice_unaligned(&mut state[4..]);
+    z.write_to_slice_unaligned(&mut state[8..]);
 }
