@@ -1,19 +1,18 @@
 use core::ops::Range;
-use ::S;
+use crate::S;
 
 
-#[cfg_attr(feature = "cargo-clippy", allow(identity_op, erasing_op))]
 pub fn gimli(state: &mut [u32; S]) {
     for round in R(24..0) {
         // SP-box
         for column in 0..4 {
-            let x = state[column + 0 * 4].rotate_left(24);
-            let y = state[column + 1 * 4].rotate_left(9);
-            let z = state[column + 2 * 4];
+            let x = state[column    ].rotate_left(24);
+            let y = state[column + 4].rotate_left(9);
+            let z = state[column + 8];
 
-            state[column + 2 * 4] = x ^ (z << 1) ^ ((y & z) << 2);
-            state[column + 1 * 4] = y ^ x        ^ ((x | z) << 1);
-            state[column + 0 * 4] = z ^ y        ^ ((x & y) << 3);
+            state[column + 8] = x ^ (z << 1) ^ ((y & z) << 2);
+            state[column + 4] = y ^ x        ^ ((x | z) << 1);
+            state[column]     = z ^ y        ^ ((x & y) << 3);
         }
 
         // linear layer

@@ -4,7 +4,7 @@ use core::arch::x86_64::{
     _mm_srli_epi32, _mm_slli_epi32
 };
 use packed_simd::{ FromBits, IntoBits, u32x4 };
-use ::S;
+use crate::S;
 
 
 macro_rules! shuffle {

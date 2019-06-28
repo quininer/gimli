@@ -1,8 +1,5 @@
 #![no_std]
 
-extern crate byteorder;
-extern crate gimli_permutation;
-
 use core::cmp;
 use byteorder::{ ByteOrder, LittleEndian };
 use gimli_permutation::{ S, gimli };
