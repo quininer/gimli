@@ -89,28 +89,26 @@ impl XofReader {
         let (prefix, buf) = buf.split_at_mut(take);
 
         if !prefix.is_empty() {
-            with(state, |state| {
-                prefix.copy_from_slice(&state[*pos..][..take]);
-                *pos += take;
-            });
+            with(state, |state| prefix.copy_from_slice(&state[*pos..][..take]));
 
+            *pos += take;
             if *pos == RATE {
                 gimli(state);
                 *pos = 0;
             }
         }
 
-        for chunk in buf.chunks_mut(RATE) {
-            let take = chunk.len();
-            with(state, |state| {
-                chunk.copy_from_slice(&state[*pos..][..take]);
-            });
+        let mut iter = buf.chunks_exact_mut(RATE);
+        while let Some(chunk) = iter.next() {
+            with(state, |state| chunk.copy_from_slice(&state[..RATE]));
+            gimli(state);
+        }
 
-            if *pos == RATE {
-                gimli(state);
-            } else {
-                *pos += take;
-            }
+        let chunk = iter.into_remainder();
+        if !chunk.is_empty() {
+            let take = chunk.len();
+            with(state, |state| chunk.copy_from_slice(&state[..take]));
+            *pos += take;
         }
     }
 }
