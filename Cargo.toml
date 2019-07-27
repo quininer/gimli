@@ -1,2 +1,2 @@
 [workspace]
-members = [ "permutation", "hash" ]
+members = [ "permutation", "hash", "aead" ]
