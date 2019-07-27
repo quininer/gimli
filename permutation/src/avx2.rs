@@ -62,6 +62,7 @@ pub unsafe fn gimli(state: &mut [u32; S], state2: &mut [u32; S]) {
     gimli_x2(state, state2)
 }
 
+#[target_feature(enable = "avx2")]
 pub unsafe fn gimli_x2(state: &mut [u32; S], state2: &mut [u32; S]) {
     let (mut x1, mut x2) =
         (_mm_loadu_si128(state[0..].as_ptr() as *const _), _mm_loadu_si128(state2[0..].as_ptr() as *const _));

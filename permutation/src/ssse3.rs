@@ -47,6 +47,7 @@ const COEFFS: [[u32; 4]; 6] = [
     [0x9e37_7910, 0, 0, 0],    [0x9e37_7914, 0, 0, 0],    [0x9e37_7918, 0, 0, 0]
 ];
 
+#[target_feature(enable = "ssse3")]
 pub unsafe fn gimli(state: &mut [u32; S]) {
     let mut x = _mm_loadu_si128(state[0..].as_ptr() as *const _);
     let mut y = _mm_loadu_si128(state[4..].as_ptr() as *const _);
