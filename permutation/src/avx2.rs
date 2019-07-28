@@ -1,20 +1,20 @@
 #[cfg(target_arch = "x86")]
 use core::arch::x86::{
+    _mm256_set_epi8,
     _mm_loadu_si128, _mm_storeu_si128,
     _mm256_loadu2_m128i, _mm256_storeu2_m128i,
     _mm256_loadu_si256,
     _mm256_shuffle_epi8, _mm256_shuffle_epi32,
-    _mm256_set_epi8,
     _mm256_srli_epi32, _mm256_slli_epi32,
     _mm256_and_si256, _mm256_or_si256, _mm256_xor_si256
 };
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::{
+    _mm256_set_epi8,
     _mm_loadu_si128, _mm_storeu_si128,
     _mm256_loadu2_m128i, _mm256_storeu2_m128i,
     _mm256_loadu_si256,
     _mm256_shuffle_epi8, _mm256_shuffle_epi32,
-    _mm256_set_epi8,
     _mm256_srli_epi32, _mm256_slli_epi32,
     _mm256_and_si256, _mm256_or_si256, _mm256_xor_si256
 };
@@ -44,6 +44,24 @@ macro_rules! xor {
         )*
         t
     }}
+}
+
+macro_rules! rotate {
+    ( $y:expr, $bits:expr ) => {
+        _mm256_or_si256(shift!(<< $y, $bits), shift!(>> $y, 32 - $bits))
+    }
+}
+
+macro_rules! rotate24 {
+    ( $x:expr ) => {
+        _mm256_shuffle_epi8(
+            $x,
+            _mm256_set_epi8(
+                12, 15, 14, 13, 8,  11, 10, 9,  4,  7,  6,  5,  0,  3,  2,  1,
+                28, 31, 30, 29, 24, 27, 26, 25, 20, 23, 22, 21, 16, 19, 18, 17
+            )
+        )
+    }
 }
 
 const COEFFS: [[u32; 8]; 6] = [
@@ -77,17 +95,11 @@ pub unsafe fn gimli_x2(state: &mut [u32; S], state2: &mut [u32; S]) {
 
     macro_rules! round {
         () => {
-            x = _mm256_shuffle_epi8(
-                x,
-                _mm256_set_epi8(
-                    12, 15, 14, 13, 8,  11, 10, 9,  4,  7,  6,  5,  0,  3,  2,  1,
-                    28, 31, 30, 29, 24, 27, 26, 25, 20, 23, 22, 21, 16, 19, 18, 17
-                )
-            );
-            y = _mm256_or_si256(shift!(<< y, 9), shift!(>> y, 32 - 9));
+            x = rotate24!(x);
+            y = rotate!(y, 9);
             let newz = xor!(x, shift!(<< z, 1), shift!(<< _mm256_and_si256(y, z), 2));
-            let newy = xor!(y, x, shift!(<< _mm256_or_si256(x, z), 1));
-            x =        xor!(z, y, shift!(<< _mm256_and_si256(x, y), 3));
+            let newy = xor!(y, x,               shift!(<<  _mm256_or_si256(x, z), 1));
+            x =        xor!(z, y,               shift!(<< _mm256_and_si256(x, y), 3));
             y = newy;
             z = newz;
         }

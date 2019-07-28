@@ -1,16 +1,16 @@
 #[cfg(target_arch = "x86")]
 use core::arch::x86::{
+    _mm_set_epi8,
     _mm_loadu_si128, _mm_storeu_si128,
     _mm_shuffle_epi8, _mm_shuffle_epi32,
-    _mm_set_epi8,
     _mm_srli_epi32, _mm_slli_epi32,
     _mm_and_si128, _mm_or_si128, _mm_xor_si128
 };
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::{
+    _mm_set_epi8,
     _mm_loadu_si128, _mm_storeu_si128,
     _mm_shuffle_epi8, _mm_shuffle_epi32,
-    _mm_set_epi8,
     _mm_srli_epi32, _mm_slli_epi32,
     _mm_and_si128, _mm_or_si128, _mm_xor_si128
 };
@@ -42,10 +42,26 @@ macro_rules! xor {
     }}
 }
 
+macro_rules! rotate {
+    ( $y:expr, $bits:expr ) => {
+        _mm_or_si128(shift!(<< $y, $bits), shift!(>> $y, 32 - $bits))
+    }
+}
+
+macro_rules! rotate24 {
+    ( $x:expr ) => {
+        _mm_shuffle_epi8(
+            $x,
+            _mm_set_epi8(12, 15, 14, 13, 8, 11, 10, 9, 4, 7, 6, 5, 0, 3, 2, 1)
+        )
+    }
+}
+
 const COEFFS: [[u32; 4]; 6] = [
     [0x9e37_7904, 0, 0, 0],    [0x9e37_7908, 0, 0, 0],    [0x9e37_790c, 0, 0, 0],
     [0x9e37_7910, 0, 0, 0],    [0x9e37_7914, 0, 0, 0],    [0x9e37_7918, 0, 0, 0]
 ];
+
 
 #[target_feature(enable = "ssse3")]
 pub unsafe fn gimli(state: &mut [u32; S]) {
@@ -55,14 +71,11 @@ pub unsafe fn gimli(state: &mut [u32; S]) {
 
     macro_rules! round {
         () => {
-            x = _mm_shuffle_epi8(
-                x,
-                _mm_set_epi8(12, 15, 14, 13, 8, 11, 10, 9, 4, 7, 6, 5, 0, 3, 2, 1)
-            );
-            y = _mm_or_si128(shift!(<< y, 9), shift!(>> y, 32 - 9));
+            x = rotate24!(x);
+            y = rotate!(y, 9);
             let newz = xor!(x, shift!(<< z, 1), shift!(<< _mm_and_si128(y, z), 2));
-            let newy = xor!(y, x, shift!(<< _mm_or_si128(x, z), 1));
-            x =        xor!(z, y, shift!(<< _mm_and_si128(x, y), 3));
+            let newy = xor!(y, x,               shift!(<<  _mm_or_si128(x, z), 1));
+            x =        xor!(z, y,               shift!(<< _mm_and_si128(x, y), 3));
             y = newy;
             z = newz;
         }
