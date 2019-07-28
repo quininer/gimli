@@ -12,6 +12,10 @@ pub mod ssse3;
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub mod avx2;
 
+#[cfg(feature = "simd")]
+#[cfg(any(target_arch = "wasm32"))]
+pub mod wasm;
+
 
 pub const S: usize = 12;
 
@@ -26,6 +30,12 @@ pub fn gimli(state: &mut [u32; S]) {
         if is_x86_feature_detected!("ssse3") {
             return ssse3::gimli(state);
         }
+    }
+
+    #[cfg(feature = "simd")]
+    #[cfg(any(target_arch = "wasm32"))]
+    {
+        return wasm::gimli(state);
     }
 
     portable::gimli(state)
