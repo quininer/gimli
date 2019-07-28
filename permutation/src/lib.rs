@@ -12,6 +12,7 @@ pub mod ssse3;
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub mod avx2;
 
+pub mod simd128;
 
 pub const S: usize = 12;
 
