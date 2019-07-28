@@ -32,6 +32,19 @@ fn test_gimli() {
     assert_eq!(data, OUTPUT);
 }
 
+#[test]
+fn test_gimli_simd128() {
+    let mut data = [0; S];
+    data.copy_from_slice(&INPUT);
+
+    let mut data2 = [0; S];
+    data2.copy_from_slice(&INPUT);
+
+    gimli_permutation::simd128::gimli(&mut data);
+    gimli_permutation::portable::gimli(&mut data2);
+    assert_eq!(data, data2);
+}
+
 #[cfg(feature = "simd")]
 #[cfg(target_feature = "ssse3")]
 #[test]

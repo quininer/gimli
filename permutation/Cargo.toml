@@ -10,6 +10,7 @@ license = "MIT"
 edition = "2018"
 
 [dependencies]
+packed_simd = "*"
 
 [features]
 simd = []
