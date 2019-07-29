@@ -7,11 +7,11 @@ pub struct Encrypt;
 pub struct Decrypt;
 
 impl GimliAead {
-    pub fn new(key: &[u8; 16], nonce: &[u8; 16]) -> GimliAead {
+    pub fn new(key: &[u8; 32], nonce: &[u8; 16]) -> GimliAead {
         let mut state = [0; S];
         with(&mut state, |state| {
-            state[..16].copy_from_slice(key);
-            state[16..].copy_from_slice(nonce);
+            state[..16].copy_from_slice(nonce);
+            state[16..].copy_from_slice(key);
         });
         gimli(&mut state);
         GimliAead(state)
