@@ -55,28 +55,3 @@ fn bench_gimli_avx2(b: &mut Bencher) {
         avx2::gimli_x2(&mut data, &mut data2);
     });
 }
-
-#[cfg(feature = "simd")]
-#[bench]
-fn bench_gimli_simd128(b: &mut Bencher) {
-    use gimli_permutation::simd128;
-
-    let mut data = black_box([45; S]);
-
-    b.iter(|| {
-        simd128::gimli(&mut data);
-    });
-}
-
-#[cfg(feature = "simd")]
-#[bench]
-fn bench_gimli_simd256(b: &mut Bencher) {
-    use gimli_permutation::simd256;
-
-    let mut data = black_box([43; S]);
-    let mut data2 = black_box([44; S]);
-
-    b.iter(|| {
-        simd256::gimli_x2(&mut data, &mut data2);
-    });
-}

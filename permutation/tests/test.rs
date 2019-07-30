@@ -1,7 +1,3 @@
-#![cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
-
-extern crate gimli_permutation;
-
 use gimli_permutation::S;
 
 
@@ -33,54 +29,12 @@ fn test_gimli() {
 }
 
 #[test]
-fn test_gimli_simd128() {
-    let mut data = [0; S];
-    data.copy_from_slice(&INPUT);
-
-    let mut data2 = [0; S];
-    data2.copy_from_slice(&INPUT);
-
-    gimli_permutation::simd128::gimli(&mut data);
-    gimli_permutation::portable::gimli(&mut data2);
-    assert_eq!(data, data2);
-}
-
-#[test]
 fn test_gimli_simd256() {
     let mut data = [0; S];
     let mut data2 = [0; S];
     data.copy_from_slice(&INPUT);
-    data2.copy_from_slice(&INPUT);
 
-    gimli_permutation::simd256::gimli_x2(&mut data, &mut data2);
-    assert_eq!(data, OUTPUT);
-    assert_eq!(data2, OUTPUT);
-}
-
-#[cfg(feature = "simd")]
-#[cfg(target_feature = "ssse3")]
-#[test]
-fn test_gimli_ssse3() {
-    let mut data = [0; S];
-    data.copy_from_slice(&INPUT);
-
-    unsafe {
-        gimli_permutation::ssse3::gimli(&mut data);
-    }
-    assert_eq!(data, OUTPUT);
-}
-
-#[cfg(feature = "simd")]
-#[cfg(target_feature = "avx2")]
-#[test]
-fn test_gimli_avx2() {
-    let mut data = [0; S];
-    let mut data2 = [0; S];
-    data.copy_from_slice(&INPUT);
-
-    unsafe {
-        gimli_permutation::avx2::gimli_x2(&mut data, &mut data2);
-    }
+    gimli_permutation::gimli_x2(&mut data, &mut data2);
     assert_eq!(data, OUTPUT);
 
 
@@ -88,9 +42,7 @@ fn test_gimli_avx2() {
     let mut data2 = [0; S];
     data2.copy_from_slice(&INPUT);
 
-    unsafe {
-        gimli_permutation::avx2::gimli_x2(&mut data, &mut data2);
-    }
+    gimli_permutation::gimli_x2(&mut data, &mut data2);
     assert_eq!(data2, OUTPUT);
 
 
@@ -99,9 +51,7 @@ fn test_gimli_avx2() {
     data.copy_from_slice(&INPUT);
     data2.copy_from_slice(&INPUT);
 
-    unsafe {
-        gimli_permutation::avx2::gimli_x2(&mut data, &mut data2);
-    }
+    gimli_permutation::gimli_x2(&mut data, &mut data2);
     assert_eq!(data, OUTPUT);
     assert_eq!(data2, OUTPUT);
 }

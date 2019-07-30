@@ -12,8 +12,11 @@ pub mod ssse3;
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub mod avx2;
 
-pub mod simd128;
-pub mod simd256;
+#[cfg(feature = "simd")]
+mod simd128;
+
+#[cfg(feature = "simd")]
+mod simd256;
 
 pub const S: usize = 12;
 
@@ -30,7 +33,13 @@ pub fn gimli(state: &mut [u32; S]) {
         }
     }
 
-    portable::gimli(state)
+    #[cfg(feature = "simd")] {
+        simd128::gimli(state)
+    }
+
+    #[cfg(not(feature = "simd"))] {
+        portable::gimli(state)
+    }
 }
 
 #[deprecated(since="0.1.1", note="please use `gimli_x2` instead")]
@@ -49,6 +58,12 @@ pub fn gimli_x2(state: &mut [u32; S], state2: &mut [u32; S]) {
         }
     }
 
-    gimli(state);
-    gimli(state2);
+    #[cfg(feature = "simd")] {
+        simd256::gimli_x2(state, state2);
+    }
+
+    #[cfg(not(feature = "simd"))] {
+        gimli(state);
+        gimli(state2);
+    }
 }
