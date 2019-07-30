@@ -1,6 +1,7 @@
 use crate::{ simd256, S };
 
 
+#[allow(deprecated)]
 #[deprecated(since="0.1.1", note="please use `avx2::gimli_x2` instead")]
 #[inline]
 pub unsafe fn gimli(state: &mut [u32; S], state2: &mut [u32; S]) {
