@@ -13,6 +13,7 @@ pub mod ssse3;
 pub mod avx2;
 
 pub mod simd128;
+pub mod simd256;
 
 pub const S: usize = 12;
 
