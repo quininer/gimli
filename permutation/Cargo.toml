@@ -13,5 +13,4 @@ edition = "2018"
 packed_simd = { version = "0.3", optional = true }
 
 [features]
-default = [ "simd" ]
 simd = [ "packed_simd" ]
