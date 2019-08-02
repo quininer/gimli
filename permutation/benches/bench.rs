@@ -55,3 +55,16 @@ fn bench_gimli_avx2(b: &mut Bencher) {
         avx2::gimli_x2(&mut data, &mut data2);
     });
 }
+
+#[cfg(feature = "simd")]
+#[cfg(target_feature = "neon")]
+#[bench]
+fn bench_gimli_neon(b: &mut Bencher) {
+    use gimli_permutation::neon;
+
+    let mut data = black_box([42; S]);
+
+    b.iter(|| unsafe {
+        neon::gimli(&mut data);
+    });
+}

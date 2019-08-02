@@ -8,7 +8,7 @@ const COEFFS: [u32x4; 6] = [
 ];
 
 #[inline]
-pub fn gimli(state: &mut [u32; S]) {
+pub fn gimli<T>(state: &mut [u32; S]) {
     let mut x = u32x4::from_slice_unaligned(&state[0..][..4]);
     let mut y = u32x4::from_slice_unaligned(&state[4..][..4]);
     let mut z = u32x4::from_slice_unaligned(&state[8..][..4]);

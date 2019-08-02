@@ -3,8 +3,7 @@ rust: nightly
 
 script:
   - cargo test
-  - # TODO simd test
-  - # cd permutation
-  - # env RUSTFLAGS="-C target-cpu=native" cargo test --features simd
+  - cd permutation
+  - cargo test --features simd
 
 cache: cargo

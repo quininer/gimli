@@ -12,7 +12,7 @@ const COEFFS: [u32x8; 6] = [
 ];
 
 #[inline]
-pub fn gimli_x2(state: &mut [u32; S], state2: &mut [u32; S]) {
+pub fn gimli_x2<T>(state: &mut [u32; S], state2: &mut [u32; S]) {
     macro_rules! load {
         ( $s:expr, $s2:expr, $n:expr ) => {
             u32x8::new(

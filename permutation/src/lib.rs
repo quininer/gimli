@@ -1,8 +1,16 @@
 #![cfg_attr(not(feature = "simd"), no_std)]
+#![cfg_attr(target_arch = "arm", feature(stdsimd, arm_target_feature))]
+#![cfg_attr(target_arch = "aarch64", feature(stdsimd, aarch64_target_feature))]
 
 extern crate core;
 
 pub mod portable;
+
+#[cfg(feature = "simd")]
+pub mod simd128;
+
+#[cfg(feature = "simd")]
+pub mod simd256;
 
 #[cfg(feature = "simd")]
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
@@ -14,21 +22,13 @@ pub mod avx2;
 
 #[cfg(feature = "simd")]
 #[cfg(any(target_arch = "arm", target_arch = "aarch64"))]
-mod neon;
-
-#[cfg(feature = "simd")]
-mod simd128;
-
-#[cfg(feature = "simd")]
-mod simd256;
+pub mod neon;
 
 pub const S: usize = 12;
 
 #[deprecated(since="0.1.1", note="please use `S` instead")]
 pub const BLOCK_LENGTH: usize = S;
 
-#[allow(deprecated)]
-#[inline]
 pub fn gimli(state: &mut [u32; S]) {
     #[cfg(feature = "simd")]
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
@@ -38,8 +38,24 @@ pub fn gimli(state: &mut [u32; S]) {
         }
     }
 
+    #[cfg(feature = "simd")]
+    #[cfg(target_arch = "arm")]
+    unsafe {
+        if is_arm_feature_detected!("neon") {
+            return neon::gimli(state);
+        }
+    }
+
+    #[cfg(feature = "simd")]
+    #[cfg(target_arch = "aarch64")]
+    unsafe {
+        if is_aarch64_feature_detected!("neon") {
+            return neon::gimli(state);
+        }
+    }
+
     #[cfg(feature = "simd")] {
-        simd128::gimli(state)
+        simd128::gimli::<()>(state)
     }
 
     #[cfg(not(feature = "simd"))] {
@@ -53,8 +69,6 @@ pub fn gimlix2(state: &mut [u32; S], state2: &mut [u32; S]) {
     gimli_x2(state, state2)
 }
 
-#[allow(deprecated)]
-#[inline]
 pub fn gimli_x2(state: &mut [u32; S], state2: &mut [u32; S]) {
     #[cfg(feature = "simd")]
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
@@ -65,7 +79,7 @@ pub fn gimli_x2(state: &mut [u32; S], state2: &mut [u32; S]) {
     }
 
     #[cfg(feature = "simd")] {
-        simd256::gimli_x2(state, state2);
+        simd256::gimli_x2::<()>(state, state2);
     }
 
     #[cfg(not(feature = "simd"))] {
