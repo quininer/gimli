@@ -10,7 +10,7 @@ license = "MIT"
 edition = "2018"
 
 [dependencies]
-packed_simd = "0.3"
+packed_simd = { version = "0.3", optional = true }
 
 [features]
-simd = []
+simd = [ "packed_simd" ]

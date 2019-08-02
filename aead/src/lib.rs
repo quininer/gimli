@@ -2,7 +2,9 @@ use byteorder::{ ByteOrder, LittleEndian };
 use gimli_permutation::{ S, gimli };
 
 
+#[derive(Clone)]
 pub struct GimliAead([u32; S]);
+
 pub struct Encrypt;
 pub struct Decrypt;
 
