@@ -19,4 +19,10 @@ byteorder = { version = "1", default-features = false }
 gimli-permutation = { version = "0.1", path = "../permutation" }
 
 [dev-dependencies]
+criterion = "0.2"
+ring = "0.16"
 hex = "0.3"
+
+[[bench]]
+name = "bench"
+harness = false
