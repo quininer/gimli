@@ -136,6 +136,7 @@ impl Process<Decrypt> {
 }
 
 
+#[inline]
 fn with<F>(state: &mut [u32; S], f: F)
     where F: FnOnce(&mut [u8; S * 4])
 {

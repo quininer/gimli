@@ -37,6 +37,11 @@ impl GimliHash {
         XofReader { state: self.state, pos: 0 }
     }
 
+    pub fn fill_block(&mut self) {
+        self.pos = 0;
+        gimli(&mut self.state);
+    }
+
     fn absorb(&mut self, buf: &[u8]) {
         let GimliHash { state, pos } = self;
 
