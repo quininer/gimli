@@ -1,7 +1,6 @@
 #![feature(test)]
 
 extern crate test;
-extern crate gimli_hash;
 
 use test::{ Bencher, black_box };
 use gimli_hash::GimliHash;

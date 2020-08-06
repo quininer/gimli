@@ -1,7 +1,6 @@
 #![feature(test)]
 
 extern crate test;
-extern crate gimli_permutation;
 
 use test::{ Bencher, black_box };
 use gimli_permutation::S;

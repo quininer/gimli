@@ -1,6 +1,3 @@
-extern crate hex;
-extern crate gimli_hash;
-
 use gimli_hash::GimliHash;
 
 

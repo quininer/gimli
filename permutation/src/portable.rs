@@ -3,6 +3,7 @@ use crate::S;
 
 
 pub fn gimli(state: &mut [u32; S]) {
+    #[allow(clippy::reversed_empty_ranges)]
     for round in R(24..0) {
         // SP-box
         for column in 0..4 {

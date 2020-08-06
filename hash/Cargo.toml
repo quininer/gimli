@@ -17,4 +17,4 @@ byteorder = { version = "1", default-features = false }
 gimli-permutation = { version = "0.1", path = "../permutation" }
 
 [dev-dependencies]
-hex = "0.3"
+hex = "0.4"

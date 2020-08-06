@@ -25,7 +25,7 @@ impl GimliAead {
 
         let mut iter = aad.chunks_exact(16);
 
-        while let Some(chunk) = iter.next() {
+        for chunk in &mut iter {
             with(&mut state, |state| {
                 for i in 0..16 {
                     state[i] ^= chunk[i];
@@ -68,7 +68,7 @@ impl Process<Encrypt> {
 
         let mut iter = buf.chunks_exact_mut(16);
 
-        while let Some(chunk) = iter.next() {
+        for chunk in &mut iter {
             with(&mut state, |state| {
                 for i in 0..16 {
                     state[i] ^= chunk[i];
@@ -100,7 +100,7 @@ impl Process<Decrypt> {
 
         let mut iter = buf.rchunks_exact_mut(16);
 
-        while let Some(chunk) = iter.next() {
+        for chunk in &mut iter {
             with(&mut state, |state| {
                 for i in 0..16 {
                     let c = chunk[i];
