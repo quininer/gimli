@@ -17,22 +17,18 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
 
-      - name: Install stable toolchain
+      - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: stable
+          toolchain: nightly
           override: true
 
       - name: Check
         run: cargo check --all --all-features --all-targets
 
   test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: ubuntu-latest
-        rust: [stable]
+    runs-on: ubuntu-latest
 
     env:
       RUSTFLAGS: "-D warnings"
@@ -40,8 +36,9 @@ jobs:
     steps:
     - uses: actions-rs/toolchain@v1
       with:
-        toolchain: ${{ matrix.rust }}
         profile: minimal
+        toolchain: nightly
+        override: true
     - uses: actions/checkout@master
     - name: Test
       run: cargo test --all
