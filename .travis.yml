@@ -1,9 +1,0 @@
-language: rust
-rust: nightly
-
-script:
-  - cargo test
-  - cd permutation
-  - cargo test --features simd
-
-cache: cargo
