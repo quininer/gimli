@@ -1,6 +1,6 @@
 [package]
 name = "gimli-permutation"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["quininer <quininer@live.com>"]
 description = "Gimli: a cross-platform permutation"
 repository = "https://github.com/quininer/gimli"
@@ -10,7 +10,7 @@ license = "MIT"
 edition = "2018"
 
 [dependencies]
-packed_simd = { version = "0.3", optional = true }
+packed_simd = { version = "0.3", package = "packed_simd_2", optional = true }
 
 [features]
 simd = [ "packed_simd" ]
