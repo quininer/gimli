@@ -1,4 +1,3 @@
-#![cfg_attr(not(feature = "simd"), no_std)]
 #![cfg_attr(feature = "simd", feature(portable_simd))]
 #![cfg_attr(target_arch = "arm", feature(stdsimd, arm_target_feature))]
 #![cfg_attr(target_arch = "aarch64", feature(stdsimd, aarch64_target_feature))]
@@ -6,22 +5,43 @@
 pub mod portable;
 
 #[cfg(feature = "simd")]
-pub mod simd128;
+mod simd128;
 
 #[cfg(feature = "simd")]
-pub mod simd256;
-
-#[cfg(feature = "simd")]
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-pub mod ssse3;
+mod simd256;
 
 #[cfg(feature = "simd")]
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-pub mod avx2;
+mod ssse3;
+
+#[cfg(feature = "simd")]
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+mod avx2;
 
 #[cfg(feature = "simd")]
 #[cfg(any(target_arch = "arm", target_arch = "aarch64"))]
-pub mod neon;
+mod neon;
+
+#[cfg(gimli_test)]
+pub mod test {
+    #[cfg(feature = "simd")]
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    pub use crate::ssse3::gimli as ssse3_gimli;
+
+    #[cfg(feature = "simd")]
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    pub use crate::avx2::gimli_x2 as avx2_gimli_x2;
+
+    #[cfg(feature = "simd")]
+    #[cfg(any(target_arch = "arm", target_arch = "aarch64"))]
+    pub use crate::neon::gimli as neon_gimli;
+
+    #[cfg(feature = "simd")]
+    pub use crate::simd128::gimli as simd128_gimli;
+
+    #[cfg(feature = "simd")]
+    pub use crate::simd256::gimli_x2 as simd256_gimli_x2;
+}
 
 pub const SIZE: usize = 12;
 
