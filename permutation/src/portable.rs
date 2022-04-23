@@ -1,8 +1,8 @@
 use core::ops::Range;
-use crate::S;
+use crate::SIZE;
 
 
-pub fn gimli(state: &mut [u32; S]) {
+pub fn gimli(state: &mut [u32; SIZE]) {
     #[allow(clippy::reversed_empty_ranges)]
     for round in R(24..0) {
         // SP-box

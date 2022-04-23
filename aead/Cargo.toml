@@ -16,7 +16,7 @@ simd = [ "gimli-permutation/simd" ]
 
 [dependencies]
 byteorder = { version = "1", default-features = false }
-gimli-permutation = { version = "0.1", path = "../permutation" }
+gimli-permutation = { version = "0.2", path = "../permutation" }
 
 [dev-dependencies]
 criterion = "0.3"
