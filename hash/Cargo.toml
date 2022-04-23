@@ -13,7 +13,6 @@ edition = "2018"
 simd = [ "gimli-permutation/simd" ]
 
 [dependencies]
-byteorder = { version = "1", default-features = false }
 gimli-permutation = { version = "0.2", path = "../permutation" }
 
 [dev-dependencies]

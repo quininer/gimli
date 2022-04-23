@@ -1,3 +1,4 @@
+#![cfg_attr(not(feature = "simd"), no_std)]
 #![cfg_attr(feature = "simd", feature(portable_simd))]
 #![cfg_attr(target_arch = "arm", feature(stdsimd, arm_target_feature))]
 #![cfg_attr(target_arch = "aarch64", feature(stdsimd, aarch64_target_feature))]
@@ -21,27 +22,6 @@ mod avx2;
 #[cfg(feature = "simd")]
 #[cfg(any(target_arch = "arm", target_arch = "aarch64"))]
 mod neon;
-
-#[cfg(gimli_test)]
-pub mod test {
-    #[cfg(feature = "simd")]
-    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    pub use crate::ssse3::gimli as ssse3_gimli;
-
-    #[cfg(feature = "simd")]
-    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    pub use crate::avx2::gimli_x2 as avx2_gimli_x2;
-
-    #[cfg(feature = "simd")]
-    #[cfg(any(target_arch = "arm", target_arch = "aarch64"))]
-    pub use crate::neon::gimli as neon_gimli;
-
-    #[cfg(feature = "simd")]
-    pub use crate::simd128::gimli as simd128_gimli;
-
-    #[cfg(feature = "simd")]
-    pub use crate::simd256::gimli_x2 as simd256_gimli_x2;
-}
 
 pub const SIZE: usize = 12;
 
@@ -96,4 +76,50 @@ pub fn gimli_x2(state: &mut [u32; SIZE], state2: &mut [u32; SIZE]) {
         gimli(state);
         gimli(state2);
     }
+}
+
+#[inline]
+pub fn state_with<F>(state: &mut [u32; SIZE], f: F)
+    where F: FnOnce(&mut [u8; SIZE * 4])
+{
+    #[inline]
+    fn transmute(arr: &mut [u32; SIZE]) -> &mut [u8; SIZE * 4] {
+        // # Safety
+        //
+        // u32 is always safe to convert to u8x4.
+        unsafe { &mut *(arr as *mut [u32; SIZE] as *mut [u8; SIZE * 4]) }
+    }
+
+    #[cfg(target_endian = "big")]
+    for n in state.iter_mut() {
+        *n = n.to_le();
+    }
+
+    f(transmute(state));
+
+    #[cfg(target_endian = "big")]
+    for n in state.iter_mut() {
+        *n = n.to_le();
+    }
+}
+
+#[cfg(gimli_test)]
+pub mod test {
+    #[cfg(feature = "simd")]
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    pub use crate::ssse3::gimli as ssse3_gimli;
+
+    #[cfg(feature = "simd")]
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    pub use crate::avx2::gimli_x2 as avx2_gimli_x2;
+
+    #[cfg(feature = "simd")]
+    #[cfg(any(target_arch = "arm", target_arch = "aarch64"))]
+    pub use crate::neon::gimli as neon_gimli;
+
+    #[cfg(feature = "simd")]
+    pub use crate::simd128::gimli as simd128_gimli;
+
+    #[cfg(feature = "simd")]
+    pub use crate::simd256::gimli_x2 as simd256_gimli_x2;
 }

@@ -1,22 +1,20 @@
 #![no_std]
 
 use core::cmp;
-use byteorder::{ ByteOrder, LittleEndian };
-use gimli_permutation::{ S, gimli };
+use gimli_permutation::{ SIZE, gimli, state_with as with };
 
 
-pub const RATE: usize = 16;
-
+const RATE: usize = 16;
 
 #[derive(Clone)]
 pub struct GimliHash {
-    state: [u32; S],
+    state: [u32; SIZE],
     pos: usize
 }
 
 impl Default for GimliHash {
     fn default() -> Self {
-        GimliHash { state: [0; S], pos: 0 }
+        GimliHash { state: [0; SIZE], pos: 0 }
     }
 }
 
@@ -82,7 +80,7 @@ impl GimliHash {
 
 
 pub struct XofReader {
-    state: [u32; S],
+    state: [u32; SIZE],
     pos: usize
 }
 
@@ -116,17 +114,4 @@ impl XofReader {
             *pos += take;
         }
     }
-}
-
-fn with<F>(state: &mut [u32; S], f: F)
-    where F: FnOnce(&mut [u8; S * 4])
-{
-    #[inline]
-    fn transmute(arr: &mut [u32; S]) -> &mut [u8; S * 4] {
-        unsafe { &mut *(arr as *mut [u32; S] as *mut [u8; S * 4]) }
-    }
-
-    LittleEndian::from_slice_u32(state);
-    f(transmute(state));
-    LittleEndian::from_slice_u32(state);
 }

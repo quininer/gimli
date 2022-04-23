@@ -1,4 +1,4 @@
-use std::simd::{ u32x8, simd_swizzle };
+use core::simd::{ u32x8, simd_swizzle };
 use crate::SIZE;
 
 

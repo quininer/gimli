@@ -25,6 +25,8 @@ jobs:
           override: true
 
       - name: Check
+        env:
+          RUSTFLAGS: --cfg gimli_test
         run: cargo check --all --all-features --all-targets
 
   test:
@@ -41,6 +43,10 @@ jobs:
         override: true
     - uses: actions/checkout@master
     - name: Test
+      env:
+        RUSTFLAGS: --cfg gimli_test
       run: cargo test --all
     - name: Test Simd
+      env:
+        RUSTFLAGS: --cfg gimli_test
       run: cargo test --all --all-features
