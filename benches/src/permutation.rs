@@ -58,7 +58,7 @@ fn bench_gimli(c: &mut Criterion) {
         let mut data = black_box([40; SIZE]);
 
         b.iter(|| {
-            test::simd128_gimli(&mut data);
+            test::simd128_gimli::<()>(&mut data);
         });
     });
 }
@@ -98,7 +98,7 @@ fn bench_gimli_x2(c: &mut Criterion) {
         let mut data2 = black_box([41; SIZE]);
 
         b.iter(|| {
-            test::simd256_gimli_x2(&mut data, &mut data2);
+            test::simd256_gimli_x2::<()>(&mut data, &mut data2);
         });
     });
 }
