@@ -60,11 +60,9 @@ fn test_kat() -> io::Result<()> {
         count += 1;
 
         let mut buf = kat.pt.clone();
-        let mut tag = [0; 16];
 
-        GimliAead::new(&kat.key, &kat.nonce)
-            .encrypt(&kat.ad)
-            .process(&mut buf, &mut tag);
+        let tag = GimliAead::new(&kat.key, &kat.nonce)
+            .encrypt(&kat.ad, &mut buf);
 
         buf.extend_from_slice(&tag);
 
@@ -75,4 +73,32 @@ fn test_kat() -> io::Result<()> {
     assert_eq!(count, 1089);
 
     Ok(())
+}
+
+#[test]
+fn test_encrypt_decrypt() {
+    let key = [0x55; 32];
+    let nonce = [0x44; 16];
+
+    let aad = [0x33; 21];
+    let plaintext = vec![0x22; 123];
+
+    let mut output = plaintext.clone();
+    let tag = GimliAead::new(&key, &nonce)
+        .encrypt(&aad, &mut output);
+
+    assert_ne!(plaintext, output);
+
+    let mut output2 = output.clone();
+    let result = GimliAead::new(&key, &nonce)
+        .decrypt(&aad, &mut output2, &tag);
+
+    assert!(result);
+    assert_eq!(plaintext, output2);
+
+    output[1] ^= 0x1;
+    let result = GimliAead::new(&key, &nonce)
+        .decrypt(&aad, &mut output, &tag);
+
+    assert!(!result);
 }

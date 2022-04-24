@@ -41,40 +41,56 @@ impl GimliHash {
     }
 
     fn absorb(&mut self, buf: &[u8]) {
-        let GimliHash { state, pos } = self;
+        let take = cmp::min(RATE - self.pos, buf.len());
+        let (prefix, buf) = buf.split_at(take);
 
-        let mut start = 0;
-        let mut len = buf.len();
-
-        while len > 0 {
-            let take = cmp::min(RATE - *pos, len);
-
-            with(state, |state| {
-                for (dst, &src) in state[*pos..][..take].iter_mut()
-                    .zip(&buf[start..][..take])
+        if !prefix.is_empty() {
+            let pos = self.pos;
+            with(&mut self.state, |state| {
+                for (dest, src) in state.iter_mut()
+                    .skip(pos)
+                    .zip(prefix)
                 {
-                    *dst ^= src;
+                    *dest ^= *src;
                 }
-                *pos += take;
-                start += take;
-                len -= take;
             });
 
-            if *pos == RATE {
-                gimli(state);
-                *pos = 0;
+            self.pos += prefix.len();
+
+            if self.pos == RATE {
+                gimli(&mut self.state);
+                self.pos = 0;
             }
+        }
+
+        let mut iter = buf.chunks_exact(RATE);
+        for chunk in &mut iter {
+            with(&mut self.state, |state| {
+                for (dest, src) in state.iter_mut().zip(chunk) {
+                    *dest ^= *src;
+                }
+            });
+            gimli(&mut self.state);
+        }
+
+        let chunk = iter.remainder();
+        if !chunk.is_empty() {
+            with(&mut self.state, |state| {
+                for (dest, src) in state.iter_mut().zip(chunk) {
+                    *dest ^= *src;
+                }
+            });
+            self.pos += chunk.len();
         }
     }
 
     fn pad(&mut self) {
-        let &mut GimliHash { ref mut state, pos } = self;
-
-        with(state, |state| {
+        let pos = self.pos;
+        with(&mut self.state, |state| {
             state[pos] ^= 0x1f;
             state[RATE - 1] ^= 0x80;
         });
-        gimli(state);
+        gimli(&mut self.state);
     }
 }
 
@@ -86,32 +102,35 @@ pub struct XofReader {
 
 impl XofReader {
     pub fn squeeze(&mut self, buf: &mut [u8]) {
-        let XofReader { state, pos } = self;
-
-        let take = cmp::min(RATE - *pos, buf.len());
+        let take = cmp::min(RATE - self.pos, buf.len());
         let (prefix, buf) = buf.split_at_mut(take);
 
         if !prefix.is_empty() {
-            with(state, |state| prefix.copy_from_slice(&state[*pos..][..take]));
+            let pos = self.pos;
+            with(&mut self.state, |state| {
+                prefix.copy_from_slice(&state[pos..][..prefix.len()]);
+            });
 
-            *pos += take;
-            if *pos == RATE {
-                gimli(state);
-                *pos = 0;
+            self.pos += prefix.len();
+
+            if self.pos == RATE {
+                gimli(&mut self.state);
+                self.pos = 0;
             }
         }
 
         let mut iter = buf.chunks_exact_mut(RATE);
-        while let Some(chunk) = iter.next() {
-            with(state, |state| chunk.copy_from_slice(&state[..RATE]));
-            gimli(state);
+        for chunk in &mut iter {
+            with(&mut self.state, |state| chunk.copy_from_slice(&state[..RATE]));
+            gimli(&mut self.state);
         }
 
         let chunk = iter.into_remainder();
         if !chunk.is_empty() {
-            let take = chunk.len();
-            with(state, |state| chunk.copy_from_slice(&state[..take]));
-            *pos += take;
+            with(&mut self.state, |state| {
+                chunk.copy_from_slice(&state[..chunk.len()]);
+            });
+            self.pos += take;
         }
     }
 }

@@ -13,11 +13,9 @@ fn bench_gimli(c: &mut Criterion) {
             let key = black_box(key.clone());
             let nonce = black_box(nonce.clone());
             let mut buf = black_box(buf.clone());
-            let mut tag = [0; 16];
 
-            GimliAead::new(&key, &nonce)
-                .encrypt(&[])
-                .process(&mut buf, &mut tag);
+            let tag = GimliAead::new(&key, &nonce)
+                .encrypt(&[], &mut buf);
 
             black_box(buf);
             black_box(tag);

@@ -5,9 +5,6 @@ use gimli_permutation::{ SIZE, gimli, state_with as with };
 #[derive(Clone)]
 pub struct GimliAead([u32; SIZE]);
 
-pub struct EncryptProcess(GimliAead);
-pub struct DecryptProcess(GimliAead);
-
 impl GimliAead {
     pub fn new(key: &[u8; 32], nonce: &[u8; 16]) -> GimliAead {
         let mut state = [0; SIZE];
@@ -45,22 +42,11 @@ impl GimliAead {
         gimli(state);
     }
 
-    pub fn encrypt(mut self, aad: &[u8]) -> EncryptProcess {
+    pub fn encrypt(mut self, aad: &[u8], m: &mut [u8]) -> [u8; 16] {
         self.process_aad(aad);
-        EncryptProcess(self)
-    }
 
-    pub fn decrypt(mut self, aad: &[u8]) -> DecryptProcess {
-        self.process_aad(aad);
-        DecryptProcess(self)
-    }
-}
-
-impl EncryptProcess {
-    pub fn process(mut self, buf: &mut [u8], tag: &mut [u8; 16]) {
-        let state = &mut (self.0).0;
-
-        let mut iter = buf.chunks_exact_mut(16);
+        let state = &mut self.0;
+        let mut iter = m.chunks_exact_mut(16);
 
         for chunk in &mut iter {
             with(state, |state| {
@@ -84,15 +70,16 @@ impl EncryptProcess {
         });
         gimli(state);
 
+        let mut tag = [0; 16];
         with(state, |state| tag.copy_from_slice(&state[..16]));
+        tag
     }
-}
 
-impl DecryptProcess {
-    pub fn process(mut self, buf: &mut [u8], tag: &[u8; 16]) -> bool {
-        let state = &mut (self.0).0;
+    pub fn decrypt(mut self, aad: &[u8], c: &mut [u8], tag: &[u8; 16]) -> bool {
+        self.process_aad(aad);
 
-        let mut iter = buf.rchunks_exact_mut(16);
+        let state = &mut self.0;
+        let mut iter = c.chunks_exact_mut(16);
 
         for chunk in &mut iter {
             with(state, |state| {

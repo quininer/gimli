@@ -1,6 +1,6 @@
 [package]
 name = "gimli-aead"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["quininer <quininer@live.com>"]
 description = "The Gimli-permutation based Aead"
 repository = "https://github.com/quininer/gimli"
