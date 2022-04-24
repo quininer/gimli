@@ -4,7 +4,7 @@ use gimli_aead::GimliAead;
 
 
 fn bench_gimli(c: &mut Criterion) {
-    c.bench_function("gimli", |b| {
+    c.bench_function("gimli-aead", |b| {
         let key = [0x08; 32];
         let nonce = [0x09; 16];
         let buf = vec![0x10; 4096];

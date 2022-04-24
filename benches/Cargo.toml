@@ -1,0 +1,32 @@
+[package]
+name = "benches"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+simd = [ "gimli-permutation/simd", "gimli-aead/simd", "gimli-hash/simd" ]
+
+[dependencies]
+gimli-permutation = { path = "../permutation" }
+gimli-aead = { path = "../aead" }
+gimli-hash = { path = "../hash" }
+
+criterion = "0.3"
+ring = "0.16"
+
+[[bench]]
+name = "permutation"
+path = "src/permutation.rs"
+harness = false
+
+[[bench]]
+name = "aead"
+path = "src/aead.rs"
+harness = false
+
+[[bench]]
+name = "hash"
+path = "src/hash.rs"
+harness = false

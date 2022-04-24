@@ -18,10 +18,4 @@ simd = [ "gimli-permutation/simd" ]
 gimli-permutation = { version = "0.2", path = "../permutation" }
 
 [dev-dependencies]
-criterion = "0.3"
-ring = "0.16"
 hex = "0.4"
-
-[[bench]]
-name = "bench"
-harness = false

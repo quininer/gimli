@@ -1,4 +1,4 @@
-use std::{ io, fs };
+use std::io;
 use std::str::Lines;
 use gimli_aead::GimliAead;
 
@@ -52,7 +52,7 @@ fn test_kat() -> io::Result<()> {
         }
     }
 
-    let buf = fs::read_to_string("./tests/LWC_AEAD_KAT_256_128.txt")?;
+    let buf = include_str!("LWC_AEAD_KAT_256_128.txt");
     let mut lines = buf.lines();
     let mut count = 0;
 
