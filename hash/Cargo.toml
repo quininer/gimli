@@ -7,7 +7,7 @@ repository = "https://github.com/quininer/gimli"
 keywords = [ "lightweight", "hash", "cryptography" ]
 categories = [ "cryptography", "no-std" ]
 license = "MIT"
-edition = "2018"
+edition = "2021"
 
 [features]
 simd = [ "gimli-permutation/simd" ]
