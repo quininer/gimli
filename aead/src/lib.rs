@@ -52,8 +52,8 @@ impl GimliAead {
             with(state, |state| {
                 for i in 0..16 {
                     state[i] ^= chunk[i];
-                    chunk[i] = state[i];
                 }
+                chunk.copy_from_slice(&state[..16]);
             });
             gimli(state);
         }
@@ -62,8 +62,8 @@ impl GimliAead {
             let chunk = iter.into_remainder();
             for i in 0..chunk.len() {
                 state[i] ^= chunk[i];
-                chunk[i] = state[i];
             }
+            chunk.copy_from_slice(&state[..chunk.len()]);
 
             state[chunk.len()] ^= 1;
             state[47] ^= 1;
